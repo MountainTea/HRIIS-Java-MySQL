@@ -1,6 +1,6 @@
 # HRIIS-Java-MySQL
-A Human Resources Interview Invitation System built using Java (Swing) and MySQL.  
-採用 Java/MySQL資料庫創建人資面試邀約系統。
+A Human Resources Interview Invitation System built using Java (Swing) and MySQL. HRIIS-Java-MySQL is designed to effectively manage interview processes, invitation records, and statistical data. The system leverages a user-friendly interface developed with Java Swing and adopts a multi-layered architecture (MVC, DAO, Service, etc.) to enhance maintainability and scalability.
+HRIIS-Java-MySQL 是一個基於 Java 與 MySQL 技術打造的人資面試邀約系統，旨在有效管理面試流程、邀約記錄及統計數據。本系統利用 Java Swing 實作直觀的使用者介面，並採用多層分離的架構（如 MVC、DAO、Service 等）以提升維護性與擴充性。
 
 ---
 
@@ -29,7 +29,7 @@ HumanResources/
     ├── chart/  
     │   ├── InterviewChartApp.java       // 求職者職稱與性別統計圖
     │   └── InterviewStatusChartApp.java   // 面試進度分析圖
-    ├── Controller/  
+    ├── Controller/                       *UI介面
     │   ├── department/  
     │   │   ├── DepartmentListFrame.java   // 部門列表
     │   │   └── DepartmentEditFrame.java   // 部門維護
@@ -44,7 +44,7 @@ HumanResources/
     │       ├── MemberManagementFrame.java // 管理人員列表
     │       ├── ProfileEditFrame.java      // 個人資料維護
     │       └── Register.java              // 註冊
-    ├── Dao/  *SQL單一功能
+    ├── Dao/                               *SQL單一功能化
     │   ├── DepartmentDao.java             // 部門
     │   ├── InterviewRecordDao.java        // 面試
     │   ├── MemberDao.java                 // 人員
@@ -52,11 +52,11 @@ HumanResources/
     │       ├── DepartmentDaoImpl.java     // 部門
     │       ├── InterviewRecordDaoImpl.java// 面試
     │       └── MemberDaoImpl.java         // 會員
-    ├── Model/  *模組
+    ├── Model/                              *模組
     │   ├── Department.java                // 部門
     │   ├── InterviewRecord.java           // 面試
     │   └── Member.java                    // 人員
-    ├── Service/   *整合功能
+    ├── Service/                           *整合
     │   ├── DepartmentService.java         // 部門
     │   ├── InterviewRecordService.java    // 面試
     │   ├── MemberService.java             // 人員
@@ -67,3 +67,11 @@ HumanResources/
     └── Util/  
         ├── Tool.java                      // 輔助功能
         └── StatusConstants.java           // 常數定義
+```
+---
+
+## 載入資料庫
+
+- **下載檔案：** xxxxx
+- **導入Schemas：** xxxxxx
+- 
