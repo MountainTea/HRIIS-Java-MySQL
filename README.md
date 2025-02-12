@@ -72,6 +72,6 @@ HumanResources/
 
 ## 下載資源
 
-- **資料庫：** [MySQL資料表](https://github.com/MountainTea/HRIIS-Java-MySQL/tree/main/sql "資料表下載")
-- **導入資料庫方法：** xxxxxx
+- **資料庫：** [檢視](https://github.com/MountainTea/HRIIS-Java-MySQL/tree/main/sql "MySQL資料表下載")
+- **執行檔：** [檢視](https://github.com/MountainTea/HRIIS-Java-MySQL/tree/main/jar "(.jar下載)")
 - 
