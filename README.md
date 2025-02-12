@@ -16,7 +16,7 @@ HRIIS-Java-MySQL 是一個基於 Java 與 MySQL 技術打造的人資面試邀�
 
 - **程式語言：** Java  
 - **UI 技術：** Java Swing  
-- **資料庫：** MySQL Workbench 8.0 CE
+- **資料庫：** MySQL
 - **開發環境：** Eclipse IDE for Java Developers (2024-09)
 
 ---
