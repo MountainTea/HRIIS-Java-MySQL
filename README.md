@@ -1,5 +1,5 @@
 # HRIIS-Java-MySQL
-A Human Resources Interview Invitation System built using Java (Swing) and MySQL. HRIIS-Java-MySQL is designed to effectively manage interview processes, invitation records, and statistical data. The system leverages a user-friendly interface developed with Java Swing and adopts a multi-layered architecture (MVC, DAO, Service, etc.) to enhance maintainability and scalability.
+A Human Resources Interview Invitation System built using Java (Swing) and MySQL. HRIIS-Java-MySQL is designed to effectively manage interview processes, invitation records, and statistical data. The system leverages a user-friendly interface developed with Java Swing and adopts a multi-layered architecture (MVC, DAO, Service, etc.) to enhance maintainability and scalability.  
 HRIIS-Java-MySQL 是一個基於 Java 與 MySQL 技術打造的人資面試邀約系統，旨在有效管理面試流程、邀約記錄及統計數據。本系統利用 Java Swing 實作直觀的使用者介面，並採用多層分離的架構（如 MVC、DAO、Service 等）以提升維護性與擴充性。
 
 ---
