@@ -1,22 +1,14 @@
 # HRIIS-Java-MySQL
 A Human Resources Interview Invitation System built using Java (Swing) and MySQL.  
-採用 Java/MySQL 資料庫創建人資面試邀約系統
+採用 Java/MySQL資料庫創建人資面試邀約系統。
 
 ---
 
 ## 專案概述
 
-HRIIS-Java-MySQL 是一個基於 Java 與 MySQL 技術打造的人資面試邀約系統，旨在幫助人力資源部門有效管理面試流程、邀約記錄以及統計數據。  
-本系統利用 Java Swing 實作直觀的使用者介面，並採用多層分離的架構（MVC、DAO、Service 等）以提高維護性與擴充性。
-
----
-
-## 專案特色
-
-- 採用 MVC 架構，分離 UI 與後端邏輯
-- 使用 Java Swing 建構直觀的桌面應用介面
-- MySQL 資料庫支援資料存取與管理
-- 提供面試流程管理、邀約記錄及數據統計功能
+- 可輔助多位管理員窗口，有效管理人員及部門，甚至管控一些突發異常。
+- 供面試官查閱未來及歷史面試相關資訊。
+- 提供人資在面試流程管控、邀約記錄落實及數據統計功能。
 
 ---
 
@@ -52,7 +44,7 @@ HumanResources/
     │       ├── MemberManagementFrame.java // 管理人員列表
     │       ├── ProfileEditFrame.java      // 個人資料維護
     │       └── Register.java              // 註冊
-    ├── Dao/  
+    ├── Dao/  *SQL單一功能
     │   ├── DepartmentDao.java             // 部門
     │   ├── InterviewRecordDao.java        // 面試
     │   ├── MemberDao.java                 // 人員
@@ -60,11 +52,11 @@ HumanResources/
     │       ├── DepartmentDaoImpl.java     // 部門
     │       ├── InterviewRecordDaoImpl.java// 面試
     │       └── MemberDaoImpl.java         // 會員
-    ├── Model/  
+    ├── Model/  *模組
     │   ├── Department.java                // 部門
     │   ├── InterviewRecord.java           // 面試
     │   └── Member.java                    // 人員
-    ├── Service/  
+    ├── Service/   *整合功能
     │   ├── DepartmentService.java         // 部門
     │   ├── InterviewRecordService.java    // 面試
     │   ├── MemberService.java             // 人員
