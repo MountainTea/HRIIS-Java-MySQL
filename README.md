@@ -81,9 +81,10 @@ HumanResources/
 ## 測試環境
 
 - ### **資料庫環境：**  
-請安裝 MySQL（建議使用 [MySQL Community Server](https://dev.mysql.com/downloads/mysql/ "資料庫程式下載")），並匯入提供的 SQL 腳本建立所需的資料表。
+請安裝 MySQL（建議使用 [MySQL Community Server](https://dev.mysql.com/downloads/mysql/ "資料庫程式下載")），並匯入提供的 SQL 腳本建立所需的資料表，匯入後若沒有即時看到請對Schemas頁面，空白處按右鍵>選擇Refresh All，重新整理一下畫面。
 
-  ![圖1](ExImg/ImportDatabaseTable.png "Import DatabaseTable")</a>
+  ![圖1](ExImg/ImportDatabaseTable.png "Import DatabaseTable")</a>  
+  
 - ### **JDK環境：**  
 下載並安裝 [JDK 11](https://www.oracle.com/java/technologies/downloads/#java11?er=221886 "JDK程式下載")環境。  
 在 CMD 中執行下列命令以確認安裝版本。
@@ -105,8 +106,9 @@ java -version
 ![圖3](ExImg/verify.png "Authentication Mechanism")</a> 
 
 - ### **權限：**  
-  部分頁面進入及使用權限有限制。  
+  部分頁面進入及使用權限有限制，其中有四種身份：單位主管、人資、人資主管、管理者。  
 (EX. 「人資/人資主管」 才具有 HR邀約列表 及 操作相關畫面 權限；「人資主管」才能檢視分析圖表 及 修改部分欄位；「管理員」為最高權限，方可進入 管理會員及部門資料。)  
+
 ![圖4](ExImg/Permissions.png "Permissions")</a> 
 
 - ### **列印及篩選：**  
