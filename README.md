@@ -89,8 +89,9 @@ HumanResources/
   部分頁面進入及使用權限有限制。  
 (EX. 「人資/人資主管」 才具有 HR邀約列表 及 操作相關畫面 權限；「人資主管」才能檢視分析圖表 及 修改部分欄位；  
 「管理員」為最高權限，方可進入 管理會員及部門資料。)  
+![圖2](ExImg/Permissions.png "Permissions")</a> 
 
 - **列印及篩選：**  
   部分管理列表可進行篩選及列印功能，其中列印功能 採IO暫存式列印，當關閉畫面後，暫存檔案(tempReport.txt)會刪除。  
   
-  ![圖2](ExImg/tempReport.png "TempReport Related")</a>  
+  ![圖3](ExImg/tempReport.png "TempReport Related")</a>  
