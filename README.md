@@ -14,10 +14,10 @@ HRIIS-Java-MySQL 是一個基於 Java 與 MySQL 技術打造的人資面試邀�
 
 ## 技術棧
 
-- **程式語言：** Java  
-- **UI 技術：** Java Swing  
-- **資料庫：** MySQL
-- **開發環境：** Eclipse IDE for Java Developers (2024-09)
+- ### **程式語言：** Java  
+- ### **UI 技術：** Java Swing  
+- ### **資料庫：** MySQL
+- ### **開發環境：** Eclipse IDE for Java Developers (2024-09)
 
 ---
 
@@ -72,32 +72,43 @@ HumanResources/
 
 ## 下載資源
 
-- **資料庫：** [檢視](https://github.com/MountainTea/HRIIS-Java-MySQL/tree/main/sql "MySQL資料表下載")
-- **執行檔：** [檢視](https://github.com/MountainTea/HRIIS-Java-MySQL/tree/main/jar "(.jar)下載")  
+- ### **資料庫：** [檢視](https://github.com/MountainTea/HRIIS-Java-MySQL/tree/main/sql "MySQL資料表下載")
+- ### **執行檔：** [檢視](https://github.com/MountainTea/HRIIS-Java-MySQL/tree/main/jar "(.jar)下載")  
  ※ 請將資料表(.sql)匯入再行啟動程式(.jar)。
 
 ---
 
 ## 測試環境
 
-- **資料庫環境：**請安裝 MySQL（建議使用 [MySQL Community Server](https://dev.mysql.com/downloads/mysql/ "資料庫程式下載")），並匯入提供的 SQL 腳本建立所需的資料表。
-- **JDK環境：**下載並安裝 [JDK 11](https://www.oracle.com/java/technologies/downloads/#java11?er=221886 "JDK程式下載")。  
+- ### **資料庫環境：**  
+請安裝 MySQL（建議使用 [MySQL Community Server](https://dev.mysql.com/downloads/mysql/ "資料庫程式下載")），並匯入提供的 SQL 腳本建立所需的資料表。
+- ### **JDK環境：**  
+下載並安裝 [JDK 11](https://www.oracle.com/java/technologies/downloads/#java11?er=221886 "JDK程式下載")環境。
+- ### **檢查Java 版本：**   
+在 CMD 中執行下列命令以確認安裝版本。
+```plaintext
+javac -version
+```
+```plaintext
+java -version
+```
+  ![圖1](ExImg/JavaVersionTest.png "Java Version Test")</a>
   
 ---
 
 ## 部分功能說明
 
-- **欄位驗證：**  
+- ### **欄位驗證：**  
   部分欄位輸入時會有即時檢核機制，且帳號(E-mail)部分有唯一識別規範。  
-(EX. 登入/註冊 帳號(E-mail)、密碼、姓名、電話...等)  
-![圖1](ExImg/verify.png "Authentication Mechanism")</a> 
+(EX. 登入/註冊 帳號(E-mail)、密碼、姓名、電話、面試日期與時間必須同時輸入或都保持空白...等)  
+![圖2](ExImg/verify.png "Authentication Mechanism")</a> 
 
-- **權限：**  
+- ### **權限：**  
   部分頁面進入及使用權限有限制。  
 (EX. 「人資/人資主管」 才具有 HR邀約列表 及 操作相關畫面 權限；「人資主管」才能檢視分析圖表 及 修改部分欄位；「管理員」為最高權限，方可進入 管理會員及部門資料。)  
-![圖2](ExImg/Permissions.png "Permissions")</a> 
+![圖3](ExImg/Permissions.png "Permissions")</a> 
 
-- **列印及篩選：**  
+- ### **列印及篩選：**  
   部分管理列表可進行篩選及列印功能，其中列印功能 採IO暫存式列印，當關閉畫面後，暫存檔案(tempReport.txt)會刪除。  
   
-  ![圖3](ExImg/tempReport.png "TempReport Related")</a>  
+  ![圖4](ExImg/tempReport.png "TempReport Related")</a>  
