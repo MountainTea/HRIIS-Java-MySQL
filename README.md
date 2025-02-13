@@ -85,8 +85,7 @@ HumanResources/
 
   ![圖1](ExImg/ImportDatabaseTable.png "Import DatabaseTable")</a>
 - ### **JDK環境：**  
-下載並安裝 [JDK 11](https://www.oracle.com/java/technologies/downloads/#java11?er=221886 "JDK程式下載")環境。
-- ### **檢查Java 版本：**   
+下載並安裝 [JDK 11](https://www.oracle.com/java/technologies/downloads/#java11?er=221886 "JDK程式下載")環境。  
 在 CMD 中執行下列命令以確認安裝版本。
 ```plaintext
 javac -version
