@@ -73,8 +73,8 @@ HumanResources/
 ## 下載資源
 
 - **資料庫：** [檢視](https://github.com/MountainTea/HRIIS-Java-MySQL/tree/main/sql "MySQL資料表下載")
-- **執行檔：** [檢視](https://github.com/MountainTea/HRIIS-Java-MySQL/tree/main/jar "(.jar下載)")
- ※ 請將資料表匯入再行啟動程式。
+- **執行檔：** [檢視](https://github.com/MountainTea/HRIIS-Java-MySQL/tree/main/jar "(.jar下載)")  
+ ※ 請將資料表(.sql)匯入再行啟動程式(.jar)。
 
 ---
 
@@ -91,5 +91,6 @@ HumanResources/
 「管理員」為最高權限，方可進入 管理會員及部門資料。)  
 
 - **列印及篩選：**  
-  部分管理列表可進行篩選及列印功能，其中列印功能 採IO暫存式列印，當關閉畫面後，暫存檔案(tempReport.txt)會刪除。
+  部分管理列表可進行篩選及列印功能，其中列印功能 採IO暫存式列印，當關閉畫面後，暫存檔案(tempReport.txt)會刪除。  
+  
   ![圖2](ExImg/tempReport.png "TempReport Related")</a>  
