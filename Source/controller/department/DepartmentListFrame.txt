@@ -1,0 +1,159 @@
+
+package controller.department;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import model.Department;
+import service.DepartmentService;
+import service.impl.DepartmentServiceImpl;
+import util.Tool;
+import controller.member.Home;
+import controller.member.Login;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.List;
+
+
+public class DepartmentListFrame extends JFrame {
+
+    private DepartmentService departmentService = new DepartmentServiceImpl();
+    private JTable table;
+    private DefaultTableModel tableModel;
+    
+    public DepartmentListFrame() {
+    	setResizable(false);
+
+        if (AppContext.currentUser == null) {
+            JOptionPane.showMessageDialog(this, "尚未登入，請先登入！");
+            new Login().setVisible(true);
+            dispose();
+            return;
+        }
+        if (!"管理者".equals(AppContext.currentUser.getRole())) {
+            JOptionPane.showMessageDialog(this, "您沒有權限進入此頁面！");
+            new Home().setVisible(true);
+            dispose();
+            return;
+        }
+        
+        setTitle("部門列表 - 管理者專用");
+        setSize(800, 600);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        getContentPane().setLayout(new BorderLayout());
+        
+
+        tableModel = new DefaultTableModel(new Object[]{"ID", "部門編號", "名稱", "介紹", "建立時間", "更新時間"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        table = new JTable(tableModel);
+
+        table.getColumnModel().getColumn(0).setPreferredWidth(50);
+
+        table.getColumnModel().getColumn(1).setPreferredWidth(100);
+
+        table.getColumnModel().getColumn(2).setPreferredWidth(150);
+  
+        table.getColumnModel().getColumn(3).setPreferredWidth(300);
+
+        table.getColumnModel().getColumn(4).setPreferredWidth(120);
+
+        table.getColumnModel().getColumn(5).setPreferredWidth(120);
+        
+        JScrollPane scrollPane = new JScrollPane(table);
+        getContentPane().add(scrollPane, BorderLayout.CENTER);
+
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JButton btnAdd = new JButton("新增");
+        JButton btnEdit = new JButton("修改");
+        JButton btnDelete = new JButton("刪除");
+        JButton btnBack = new JButton("返回");
+        btnPanel.add(btnAdd);
+        btnPanel.add(btnEdit);
+        btnPanel.add(btnDelete);
+        btnPanel.add(btnBack);
+        getContentPane().add(btnPanel, BorderLayout.SOUTH);
+
+        loadDepartmentData();
+
+        btnAdd.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new DepartmentEditFrame(null).setVisible(true);
+                dispose();
+            }
+        });
+
+        btnEdit.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int selectedRow = table.getSelectedRow();
+                if(selectedRow == -1){
+                    JOptionPane.showMessageDialog(DepartmentListFrame.this, "請先選擇一筆資料進行修改！");
+                    return;
+                }
+                int depId = Integer.parseInt(tableModel.getValueAt(selectedRow, 0).toString());
+                Department dep = departmentService.getDepartmentById(depId);
+                if(dep == null){
+                    JOptionPane.showMessageDialog(DepartmentListFrame.this, "無法取得選擇的部門資料！");
+                    return;
+                }
+                new DepartmentEditFrame(dep).setVisible(true);
+                dispose();
+            }
+        });
+
+        btnDelete.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int selectedRow = table.getSelectedRow();
+                if(selectedRow == -1){
+                    JOptionPane.showMessageDialog(DepartmentListFrame.this, "請先選擇一筆資料進行刪除！");
+                    return;
+                }
+                int confirm = JOptionPane.showConfirmDialog(DepartmentListFrame.this, "確定要刪除選擇的部門嗎？", "確認刪除", JOptionPane.YES_NO_OPTION);
+                if(confirm == JOptionPane.YES_OPTION){
+                    int depId = Integer.parseInt(tableModel.getValueAt(selectedRow, 0).toString());
+                    departmentService.deleteDepartment(depId);
+                    JOptionPane.showMessageDialog(DepartmentListFrame.this, "刪除成功！");
+                    loadDepartmentData();
+                }
+            }
+        });
+
+        btnBack.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new Home().setVisible(true);
+                dispose();
+            }
+        });
+    }
+
+    private void loadDepartmentData(){
+        tableModel.setRowCount(0);
+        List<Department> list = departmentService.getAllDepartments();
+        for(Department dep : list){
+            tableModel.addRow(new Object[]{
+                dep.getId(),
+                dep.getDepNo(),
+                dep.getName(),
+                dep.getDescription(),
+                dep.getCreatedAt(),
+                dep.getUpdatedAt()
+            });
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable(){
+            @Override
+            public void run(){
+                new DepartmentListFrame().setVisible(true);
+            }
+        });
+    }
+}

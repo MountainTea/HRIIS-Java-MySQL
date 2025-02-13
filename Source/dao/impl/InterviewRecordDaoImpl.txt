@@ -1,0 +1,262 @@
+package dao.impl;
+
+import dao.InterviewRecordDao;
+import model.InterviewRecord;
+import util.DbConnection;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class InterviewRecordDaoImpl implements InterviewRecordDao {
+
+    private static Connection conn = DbConnection.getDb();
+
+    @Override
+    public void addInterviewRecord(InterviewRecord interviewRecord) {
+        String intNo = getNextIntNo();
+        
+        String sql = "INSERT INTO interviewrecord (int_no, position, department_no, interviewer_no, "
+                   + "interviewee_name, interviewee_phone, interviewee_gender, hr_no, interviewDate, "
+                   + "status, remarks, created_at, updated_at) "
+                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, intNo);  // 使用自動生成的面試編號
+            ps.setString(2, interviewRecord.getPosition());
+            ps.setString(3, interviewRecord.getDepartmentNo());
+            ps.setString(4, interviewRecord.getInterviewerNo());
+            ps.setString(5, interviewRecord.getIntervieweeName());
+            ps.setString(6, interviewRecord.getIntervieweePhone());
+            if (interviewRecord.getIntervieweeGender() != null) {
+                ps.setInt(7, interviewRecord.getIntervieweeGender());
+            } else {
+                ps.setNull(7, Types.INTEGER);
+            }
+            ps.setString(8, interviewRecord.getHrNo());
+            ps.setString(9, interviewRecord.getInterviewDate());
+            ps.setString(10, interviewRecord.getStatus());
+            ps.setString(11, interviewRecord.getRemarks());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    @Override
+    public String getNextIntNo() {
+        String sql = "SELECT MAX(int_no) FROM interviewrecord";
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                String maxIntNo = rs.getString(1);
+                if (maxIntNo != null) {
+                    int nextNumber = Integer.parseInt(maxIntNo.substring(3)) + 1;
+                    return "int" + String.format("%03d", nextNumber);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "int001"; 
+    }
+
+    @Override
+    public InterviewRecord getInterviewRecordById(int id) {
+        String sql = "SELECT * FROM new_view WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSetToInterviewRecord(rs);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public InterviewRecord getInterviewRecordByNo(String intNo) {
+        String sql = "SELECT * FROM new_view WHERE int_no = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, intNo);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSetToInterviewRecord(rs);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public List<InterviewRecord> getAllInterviewRecords() {
+        String sql = "SELECT * FROM new_view";
+        List<InterviewRecord> records = new ArrayList<>();
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                records.add(mapResultSetToInterviewRecord(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return records;
+    }
+
+    @Override
+    public void updateInterviewRecord(InterviewRecord interviewRecord) {
+        // 注意這裡一定要帶上 interviewee_gender = ?
+        String sql = "UPDATE interviewrecord "
+                   + "SET position = ?, department_no = ?, interviewer_no = ?, interviewee_name = ?, "
+                   + "    interviewee_phone = ?, interviewee_gender = ?, hr_no = ?, interviewDate = ?, "
+                   + "    status = ?, remarks = ?, updated_at = NOW() "
+                   + "WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, interviewRecord.getPosition());
+            ps.setString(2, interviewRecord.getDepartmentNo());
+            ps.setString(3, interviewRecord.getInterviewerNo());
+            ps.setString(4, interviewRecord.getIntervieweeName());
+            ps.setString(5, interviewRecord.getIntervieweePhone());
+
+            if (interviewRecord.getIntervieweeGender() != null) {
+                ps.setInt(6, interviewRecord.getIntervieweeGender());
+            } else {
+                ps.setNull(6, Types.INTEGER);
+            }
+            ps.setString(7, interviewRecord.getHrNo());
+            ps.setString(8, interviewRecord.getInterviewDate());
+            ps.setString(9, interviewRecord.getStatus());
+            ps.setString(10, interviewRecord.getRemarks());
+            ps.setInt(11, interviewRecord.getId());
+            
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void deleteInterviewRecord(int id) {
+        String sql = "DELETE FROM interviewrecord WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private InterviewRecord mapResultSetToInterviewRecord(ResultSet rs) throws SQLException {
+        InterviewRecord record = new InterviewRecord();
+        record.setId(rs.getInt("id"));
+        record.setIntNo(rs.getString("int_no"));
+        record.setPosition(rs.getString("position"));
+        record.setDepartmentNo(rs.getString("department_no"));
+        record.setInterviewerNo(rs.getString("interviewer_no"));
+        record.setHrNo(rs.getString("hr_no"));
+        record.setDepartmentName(rs.getString("department_name"));
+        record.setInterviewerName(rs.getString("interviewer_name"));
+        record.setHrName(rs.getString("hr_name"));
+        record.setIntervieweeName(rs.getString("interviewee_name"));
+        record.setIntervieweePhone(rs.getString("interviewee_phone"));
+        // 新增讀取性別
+        record.setIntervieweeGender(rs.getInt("interviewee_gender"));
+        record.setInterviewDate(rs.getString("interviewDate"));
+        record.setStatus(rs.getString("status"));
+        record.setRemarks(rs.getString("remarks"));
+        record.setCreatedAt(rs.getTimestamp("created_at"));
+        record.setUpdatedAt(rs.getTimestamp("updated_at"));
+        return record;
+    }
+
+    @Override
+    public List<InterviewRecord> getInterviewRecordsByIntervieweeName(String intervieweeName) {
+        String sql = "SELECT * FROM new_view WHERE interviewee_name = ?";
+        List<InterviewRecord> records = new ArrayList<>();
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, intervieweeName);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    records.add(mapResultSetToInterviewRecord(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return records;
+    }
+
+    @Override
+    public List<InterviewRecord> getInterviewRecordsByIntervieweePhone(String intervieweePhone) {
+        String sql = "SELECT * FROM new_view WHERE interviewee_phone = ?";
+        List<InterviewRecord> records = new ArrayList<>();
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, intervieweePhone);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    records.add(mapResultSetToInterviewRecord(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return records;
+    }
+    
+    @Override
+    public List<InterviewRecord> getInterviewRecordsByInterviewerNo(String interviewerNo) {
+        String sql = "SELECT * FROM new_view WHERE interviewer_no = ?";
+        List<InterviewRecord> records = new ArrayList<>();
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, interviewerNo);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    records.add(mapResultSetToInterviewRecord(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return records;
+    }
+
+    @Override
+    public List<InterviewRecord> getInterviewRecordsByHrNo(String hrNo) {
+        String sql = "SELECT * FROM new_view WHERE hr_no = ?"; 
+        List<InterviewRecord> records = new ArrayList<>();
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, hrNo);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    records.add(mapResultSetToInterviewRecord(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return records;
+    }
+    
+    @Override
+    public List<InterviewRecord> getInterviewRecordsByDepartmentNo(String departmentNo) {
+        String sql = "SELECT * FROM new_view WHERE department_no = ?";
+        List<InterviewRecord> records = new ArrayList<>();
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, departmentNo);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    records.add(mapResultSetToInterviewRecord(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return records;
+    }
+}

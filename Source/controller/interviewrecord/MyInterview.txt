@@ -1,0 +1,158 @@
+
+package controller.interviewrecord;
+
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.*;
+import javax.swing.RowFilter;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
+import model.InterviewRecord;
+import model.Member;
+import service.InterviewRecordService;
+import service.impl.InterviewRecordServiceImpl;
+import controller.member.Home;
+import controller.member.Login;
+import util.tool;
+
+public class MyInterview extends JFrame {
+	
+    private JTable table;
+    private DefaultTableModel model;
+    private InterviewRecordService interviewRecordService = new InterviewRecordServiceImpl();
+
+    public MyInterview() {
+        Member currentUser = AppContext.currentUser;
+        if (currentUser == null) {
+            JOptionPane.showMessageDialog(this, "請先登入！");
+            new Login().setVisible(true);
+            dispose();
+            return;
+        }
+
+        setTitle("我的面試");
+        setSize(1000, 600);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        model = new DefaultTableModel();
+        model.setColumnIdentifiers(new Object[] {   title     });
+
+        table = new JTable(model);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model);
+        table.setRowSorter(sorter);
+
+        loadTableData();
+
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        table.getColumnModel().getColumn(0).setPreferredWidth(40);
+        table.getColumnModel().getColumn(1).setPreferredWidth(100); 
+        table.getColumnModel().getColumn(2).setPreferredWidth(80);
+        table.getColumnModel().getColumn(3).setPreferredWidth(50); 
+        table.getColumnModel().getColumn(4).setPreferredWidth(50); 
+        table.getColumnModel().getColumn(5).setPreferredWidth(50); 
+        table.getColumnModel().getColumn(6).setPreferredWidth(40);  
+        table.getColumnModel().getColumn(7).setPreferredWidth(100); 
+        table.getColumnModel().getColumn(8).setPreferredWidth(100);  
+        table.getColumnModel().getColumn(9).setPreferredWidth(300); 
+
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        searchPanel.add(new JLabel("搜尋："));
+        JTextField txtSearch = new JTextField(20);
+        searchPanel.add(txtSearch);
+        searchPanel.add(new JLabel("進度："));
+        
+        JComboBox<String> cboStatus = new JComboBox<>(new String[] {"全部", "結案", "未結案"});
+        searchPanel.add(cboStatus);
+        JButton btnSearch = new JButton("搜尋");
+        searchPanel.add(btnSearch);
+
+       
+        ActionListener searchAction = e -> applyFilters(sorter, txtSearch, cboStatus);
+        btnSearch.addActionListener(searchAction);
+        txtSearch.addActionListener(searchAction);
+        cboStatus.addActionListener(searchAction);
+
+        add(searchPanel, BorderLayout.NORTH);
+
+       
+        JScrollPane scrollPane = new JScrollPane(table);
+        add(scrollPane, BorderLayout.CENTER);
+
+        JPanel bottomPanel = new JPanel();
+        JButton btnBack = new JButton("返回首頁");
+        btnBack.addActionListener(e -> {
+            new Home().setVisible(true);
+            dispose();
+        });
+        bottomPanel.add(btnBack);
+        add(bottomPanel, BorderLayout.SOUTH);
+    }
+
+    private void applyFilters(TableRowSorter<DefaultTableModel> sorter, JTextField txtSearch, JComboBox<String> cboStatus) {
+        List<RowFilter<Object, Object>> filters = new ArrayList<>();
+
+        
+        String searchText = txtSearch.getText().trim();
+        if (!searchText.isEmpty()) {
+            filters.add(RowFilter.regexFilter("(?i)" + searchText));
+        }
+
+      
+        String statusSelected = (String)cboStatus.getSelectedItem();
+        if ("結案".equals(statusSelected)) {
+            filters.add(RowFilter.regexFilter("結案", 8));
+        } else if ("未結案".equals(statusSelected)) {
+    
+            filters.add(RowFilter.notFilter(RowFilter.regexFilter("結案", 8)));
+        }
+
+
+        if (!filters.isEmpty()) {
+            RowFilter<Object, Object> compoundFilter = RowFilter.andFilter(filters);
+            sorter.setRowFilter(compoundFilter);
+        } else {
+            sorter.setRowFilter(null);
+        }
+    }
+
+
+    private void loadTableData() {
+        model.setRowCount(0);
+        List<InterviewRecord> allRecords = interviewRecordService.getAllInterviewRecords();
+        List<InterviewRecord> filteredRecords = new ArrayList<>();
+        Member currentUser = AppContext.currentUser;
+
+        for (InterviewRecord r : allRecords) {
+            if (currentUser.getMemNo().equals(r.getInterviewerNo())) {
+                filteredRecords.add(r);
+            }
+        }
+
+        for (InterviewRecord r : filteredRecords) {
+            model.addRow(new Object[] {
+                r.getIntNo(),
+                r.getPosition(),
+                r.getDepartmentName(),
+                r.getInterviewerName(),
+                r.getHrName(),
+                r.getIntervieweeName(),
+                genderInChinese(r.getIntervieweeGender()),
+                r.getInterviewDate(),
+                r.getStatus(),
+                r.getRemarks()
+            });
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            new MyInterview().setVisible(true);
+        });
+    }
+}

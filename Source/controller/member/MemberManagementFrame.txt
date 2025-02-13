@@ -1,0 +1,239 @@
+package controller.member;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
+import javax.swing.RowFilter;
+import javax.swing.SortOrder;
+import javax.swing.RowSorter;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.List;
+import java.util.ArrayList;
+import model.Member;
+import service.MemberService;
+import service.impl.MemberServiceImpl;
+import util.Tool;
+import controller.member.Home;
+import controller.member.MemberEditDialog;  
+import controller.member.ProfileEditFrame;
+
+public class MemberManagementFrame extends JFrame {
+
+    private MemberService memberService;
+    private JTable table;
+    private DefaultTableModel tableModel;
+    private JButton btnAdd, btnEdit, btnDelete, btnBack;
+    private String[] columnNames = {
+        "ID", "mem_no", "Name", "Gender", "Email", 
+        "Phone", "Address", "Role", "Password", 
+        "Created_At", "Updated_At"
+    };
+
+    // ****select
+    private JTextField txtSearch;
+    private JComboBox<String> cboRole;
+    private JComboBox<String> cboSort;
+    private JButton btnSearch;
+
+    public MemberManagementFrame() {
+        super("會員管理");
+        memberService = new MemberServiceImpl();
+
+        if (AppContext.currentUser == null || !"管理者".equals(AppContext.currentUser.getRole())) {
+            JOptionPane.showMessageDialog(this, "您沒有權限！");
+            new Home().setVisible(true);
+            dispose();
+            return;
+        }
+
+        initComponents();
+        loadMembers();
+    }
+
+    private void initComponents() {
+        setSize(900, 500);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        tableModel = new DefaultTableModel(null, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        table = new JTable(tableModel);
+
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
+        table.setRowSorter(sorter);
+
+        JScrollPane scrollPane = new JScrollPane(table);
+
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+        searchPanel.add(new JLabel("關鍵字："));
+        txtSearch = new JTextField(15);
+        searchPanel.add(txtSearch);
+
+        searchPanel.add(new JLabel("角色："));
+
+        cboRole = new JComboBox<>(new String[] { select});
+        searchPanel.add(cboRole);
+
+        searchPanel.add(new JLabel("排序："));
+
+        cboSort = new JComboBox<>(new String[] {
+            "預設", "ID", "mem_no", "Name", "Gender", "Email", "Phone", "Address", "Role", "Password", "Created_At", "Updated_At"
+        });
+        searchPanel.add(cboSort);
+
+        btnSearch = new JButton("搜尋");
+        searchPanel.add(btnSearch);
+
+        ActionListener searchAction = e -> applyFilters(sorter, txtSearch, cboRole);
+        btnSearch.addActionListener(searchAction);
+        txtSearch.addActionListener(searchAction);
+        cboRole.addActionListener(searchAction);
+
+        cboSort.addActionListener(e -> {
+            int selectedIndex = cboSort.getSelectedIndex();
+            if (selectedIndex > 0) {
+  
+                List<RowSorter.SortKey> sortKeys = new ArrayList<>();
+                sortKeys.add(new RowSorter.SortKey(selectedIndex - 1, SortOrder.ASCENDING));
+                sorter.setSortKeys(sortKeys);
+            } else {
+                sorter.setSortKeys(null);
+            }
+        });
+
+        add(searchPanel, BorderLayout.NORTH);
+        // -------------------------------
+
+        add(scrollPane, BorderLayout.CENTER);
+
+        JPanel panelButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+
+        btnAdd = new JButton("新增");
+        btnAdd.addActionListener(e -> doAdd());
+        panelButtons.add(btnAdd);
+
+        btnEdit = new JButton("修改");
+        btnEdit.addActionListener(e -> doEdit());
+        panelButtons.add(btnEdit);
+
+        btnDelete = new JButton("刪除");
+        btnDelete.addActionListener(e -> doDelete());
+        panelButtons.add(btnDelete);
+
+        btnBack = new JButton("返回");
+        btnBack.addActionListener(e -> {
+            new ProfileEditFrame().setVisible(true);
+            dispose();
+        });
+        panelButtons.add(btnBack);
+
+        add(panelButtons, BorderLayout.SOUTH);
+    }
+
+    private void applyFilters(TableRowSorter<DefaultTableModel> sorter, JTextField txtSearch, JComboBox<String> cboRole) {
+        List<RowFilter<Object, Object>> filters = new ArrayList<>();
+
+        String searchText = txtSearch.getText().trim();
+        if (!searchText.isEmpty()) {
+            filters.add(RowFilter.regexFilter("(?i)" + searchText));
+        }
+
+        String selectedRole = (String) cboRole.getSelectedItem();
+        if (!"全部".equals(selectedRole)) {
+            filters.add(RowFilter.regexFilter(selectedRole, 7));
+        }
+        
+
+        if (!filters.isEmpty()) {
+            RowFilter<Object, Object> compoundFilter = RowFilter.andFilter(filters);
+            sorter.setRowFilter(compoundFilter);
+        } else {
+            sorter.setRowFilter(null);
+        }
+    }
+
+ 
+    private void loadMembers() {
+        tableModel.setRowCount(0);
+        List<Member> all = memberService.getAllMembers();
+        for (Member m : all) {
+            Object[] rowData = {
+                m.getId(),
+                m.getMemNo(),
+                m.getName(),
+                (m.getGender() == null ? "" : (m.getGender() == 1 ? "男" : "女")),
+                m.getEmail(),
+                m.getPhone(),
+                m.getAddress(),
+                m.getRole(),
+                m.getPassword(),
+                m.getCreatedAt(),
+                m.getUpdatedAt()
+            };
+            tableModel.addRow(rowData);
+        }
+    }
+
+    private void doAdd() {
+        MemberEditDialog dialog = new MemberEditDialog(this, null);
+        dialog.setVisible(true);
+        loadMembers();
+    }
+
+    private void doEdit() {
+        int row = table.getSelectedRow();
+        if (row < 0) {
+            JOptionPane.showMessageDialog(this, "請先選擇");
+            return;
+        }
+       
+        int modelRow = table.convertRowIndexToModel(row);
+        Integer id = (Integer) tableModel.getValueAt(modelRow, 0);
+        if (id == null) {
+            JOptionPane.showMessageDialog(this, "無效");
+            return;
+        }
+        Member member = memberService.getMemberById(id);
+        if (member == null) {
+            JOptionPane.showMessageDialog(this, "找不到 (ID=" + id + ")");
+            return;
+        }
+        MemberEditDialog dialog = new MemberEditDialog(this, member);
+        dialog.setVisible(true);
+        loadMembers();
+    }
+
+    private void doDelete() {
+        int row = table.getSelectedRow();
+        if (row < 0) {
+            JOptionPane.showMessageDialog(this, "請先選擇");
+            return;
+        }
+       
+        int modelRow = table.convertRowIndexToModel(row);
+        Integer id = (Integer) tableModel.getValueAt(modelRow, 0);
+        if (id == null) {
+            JOptionPane.showMessageDialog(this, "無效的ID");
+            return;
+        }
+        int confirm = JOptionPane.showConfirmDialog(this, "確定要刪除 ID=" + id + " 的會員嗎？", "確認", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+            memberService.deleteMember(id);
+            JOptionPane.showMessageDialog(this, "刪除成功");
+            loadMembers();
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            new MemberManagementFrame().setVisible(true);
+        });
+    }
+}

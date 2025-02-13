@@ -1,0 +1,202 @@
+package model;
+
+import java.sql.Timestamp;
+
+
+public class InterviewRecord {
+	
+	//Field
+    private int id;
+    private String intNo;
+    private String position;
+    private String departmentNo;
+    private String interviewerNo;
+    private String hrNo;
+    private String intervieweeName;
+    private String intervieweePhone;
+    private Integer intervieweeGender;
+    private String  interviewDate;
+    private String status; 
+    private String remarks;
+    private Timestamp createdAt;
+    private Timestamp updatedAt;
+    private String departmentName; 
+    private String interviewerName;
+    private String hrName;
+
+    // Constructor
+    public InterviewRecord() {
+        super();
+    }
+    public InterviewRecord(int id, String intNo, String position, String departmentNo, String interviewerNo, 
+                           String hrNo, String intervieweeName, String intervieweePhone, Integer intervieweeGender,String  interviewDate, String status, String remarks,
+                           Timestamp createdAt, Timestamp updatedAt) {
+        this.id = id;
+        this.intNo = intNo;
+        this.position = position;
+        this.departmentNo = departmentNo;
+        this.interviewerNo = interviewerNo;
+        this.intervieweeName = intervieweeName;
+        this.intervieweePhone = intervieweePhone;
+        this.intervieweeGender = intervieweeGender;
+        this.hrNo = hrNo;
+        this.interviewDate = interviewDate;
+        this.status = status;
+        this.remarks = remarks;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    // Meyhods
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getIntNo() {
+        return intNo;
+    }
+
+    public void setIntNo(String intNo) {
+        this.intNo = intNo;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
+    }
+
+    public String getDepartmentNo() {
+        return departmentNo;
+    }
+
+    public void setDepartmentNo(String departmentNo) {
+        this.departmentNo = departmentNo;
+    }
+
+    public String getInterviewerNo() {
+        return interviewerNo;
+    }
+
+    public void setInterviewerNo(String interviewerNo) {
+        this.interviewerNo = interviewerNo;
+    }
+
+    public String getIntervieweeName() {
+        return intervieweeName;
+    }
+
+    public void setIntervieweeName(String intervieweeName) {
+        this.intervieweeName = intervieweeName;
+    }
+    
+    public String getIntervieweePhone() {
+        return intervieweePhone;
+    }
+
+    public void setIntervieweePhone(String intervieweePhone) {
+        this.intervieweePhone = intervieweePhone;
+    }
+
+    public String getHrNo() {
+        return hrNo;
+    }
+
+    public void setHrNo(String hrNo) {
+        this.hrNo = hrNo;
+    }
+
+    public String   getInterviewDate() {
+        return interviewDate;
+    }
+
+    public void setInterviewDate(String  interviewDate) {
+        this.interviewDate = interviewDate;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getRemarks() {
+        return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
+    }
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Timestamp getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Timestamp updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    @Override
+    public String toString() {
+        return "InterviewRecord{id=" + id + ", intNo='" + intNo + "', position='" + position + "', departmentNo='" + departmentNo + "', interviewerNo='" + interviewerNo + "', intervieweeName='" + intervieweeName + "', intervieweePhone='" + intervieweePhone + "', hrNo='" + hrNo + "', interviewDate=" + interviewDate + ", status='" + status + "', remarks='" + remarks + "', createdAt='" + createdAt + "', updatedAt='" + updatedAt + "'}";
+    }
+    
+    public String getDepartmentName() {
+        return departmentName;
+    }
+
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
+    }
+
+    public String getInterviewerName() {
+        return interviewerName;
+    }
+
+    public void setInterviewerName(String interviewerName) {
+        this.interviewerName = interviewerName;
+    }
+
+    public String getHrName() {
+        return hrName;
+    }
+
+    public void setHrName(String hrName) {
+        this.hrName = hrName;
+    }
+    
+    public Integer getIntervieweeGender() {
+        return intervieweeGender;
+    }
+
+    public void setIntervieweeGender(Integer intervieweeGender) {
+        this.intervieweeGender = intervieweeGender;
+    }
+    
+    public String getIntervieweeGenderInChinese() {
+        if (intervieweeGender == null) return "";
+        switch (intervieweeGender) {
+            case 1: return "男";
+            case 2: return "女";
+            default: return "";
+        }
+    }
+
+    
+}

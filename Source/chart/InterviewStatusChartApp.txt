@@ -1,0 +1,102 @@
+package chart;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.Tool;
+
+import model.InterviewRecord;
+import service.InterviewRecordService;
+import service.impl.InterviewRecordServiceImpl;
+
+public class InterviewStatusChartApp {
+    public static void main(String[] args) {
+    	
+        SwingUtilities.invokeLater(() -> {
+
+            InterviewRecordService service = new InterviewRecordServiceImpl();
+            List<InterviewRecord> records = service.getAllInterviewRecords();
+
+            Map<String, Integer> statusCount = new LinkedHashMap<>();
+            for (InterviewRecord record : records) {
+                String status = record.getStatus();
+                if (status == null || status.trim().isEmpty()) {
+                    status = "(未設定狀態)";
+                }
+                statusCount.put(status, statusCount.getOrDefault(status, 0) + 1);
+            }
+            InterviewStatusChartPanel chartPanel = new InterviewStatusChartPanel(statusCount);
+
+            JFrame frame = new JFrame("面試進度");
+            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            frame.add(chartPanel);
+            frame.pack();
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
+        });
+    }
+}
+class InterviewStatusChartPanel extends JPanel {
+    private Map<String, Integer> statusCount;
+    private int total;
+
+    public InterviewStatusChartPanel(Map<String, Integer> statusCount) {
+        this.statusCount = statusCount;
+        total = 0;
+        for (Integer count : statusCount.values()) {
+            total += count;
+        }
+        setPreferredSize(new Dimension(600, 400));
+        setFont(new Font("微軟正黑體", Font.PLAIN, 14));
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        Graphics2D g2 = (Graphics2D) g;
+        int width = getWidth();
+        int height = getHeight();
+        
+        Font titleFont = new Font("微軟正黑體", Font.BOLD, 20);
+        g2.setFont(titleFont);
+        FontMetrics fmTitle = g2.getFontMetrics();
+        String title = "分佈圖";
+        int titleWidth = fmTitle.stringWidth(title);
+        g2.drawString(title, (width - titleWidth) / 2, 30);
+        
+        int pieX = 30;
+        int pieY = 60;
+        int pieWidth = 300;
+        int pieHeight = 300;
+        
+        Color[] colors = { Color.BLUE, Color.RED, Color.GREEN, Color.ORANGE, Color.MAGENTA, Color.CYAN, Color.PINK, Color.GRAY };
+        int colorIndex = 0;
+        
+        int startAngle = 0;
+        for (Map.Entry<String, Integer> entry : statusCount.entrySet()) {
+            String status = entry.getKey();
+            int count = entry.getValue();
+
+            int angle = (int) Math.round(((double) count / total) * 360);
+            g2.setColor(colors[colorIndex % colors.length]);
+            g2.fillArc(pieX, pieY, pieWidth, pieHeight, startAngle, angle);
+            g2.setColor(Color.BLACK);
+            g2.drawArc(pieX, pieY, pieWidth, pieHeight, startAngle, angle);
+            
+            int legendX = pieX + pieWidth + 50;
+            int legendY = pieY + colorIndex * 30;
+            g2.setColor(colors[colorIndex % colors.length]);
+            g2.fillRect(legendX, legendY, 20, 20);
+            g2.setColor(Color.BLACK);
+            g2.drawRect(legendX, legendY, 20, 20);
+
+            Font legendFont = new Font("微軟正黑體", Font.PLAIN, 14);
+            g2.setFont(legendFont);
+            String legendText = status + " (" + count + ")";
+            g2.drawString(legendText, legendX + 40, legendY + 15);
+            
+            startAngle += angle;
+            colorIndex++;
+        }
+    }
+}

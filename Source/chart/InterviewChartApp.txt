@@ -1,0 +1,28 @@
+
+package chart;
+
+import javax.swing.*;
+import java.util;
+import model.InterviewRecord;
+import service.InterviewRecordService;
+import service.impl.InterviewRecordServiceImpl;
+
+public class InterviewChartApp {
+    public static void main(String[] args) {
+    	
+        SwingUtilities.invokeLater(() -> {
+
+            InterviewRecordService service = new InterviewRecordServiceImpl();
+            List<InterviewRecord> records = service.getAllInterviewRecords();
+            
+
+            InterviewChartPanel chartPanel = new InterviewChartPanel(records);
+            JFrame frame = new JFrame("面試者職稱與性別分析");
+            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            frame.add(chartPanel);
+            frame.pack();
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
+        });
+    }
+}

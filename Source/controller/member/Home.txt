@@ -1,0 +1,98 @@
+package controller.member;
+
+import java.awt.Font;
+import javax.swing.*;
+import model.Member;
+import controller.interviewrecord.HRInterviewManagement;
+import controller.interviewrecord.MyInterview;
+import util.tool;
+import controller.department.DepartmentListFrame;
+import controller.department.DepartmentEditFrame;
+
+public class Home extends JFrame {
+
+    private static final long serialVersionUID = 1L;
+
+    public Home() {
+    	setResizable(false);
+        setTitle("主頁面 - Home");
+        setBounds(300, 300, 400, 300);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        getContentPane().setLayout(null);
+
+
+        if (AppContext.currentUser == null) {
+            JOptionPane.showMessageDialog(this, "尚未登入，請先登入！");
+            new Login().setVisible(true);
+            dispose();
+            return;
+        }
+
+
+        Member current = AppContext.currentUser;
+        JLabel lblGreeting = new JLabel(current.getRole() + " " + current.getName() + " 您好！");
+        lblGreeting.setFont(new Font("微軟正黑體", Font.PLAIN, 16));
+        lblGreeting.setBounds(10, 10, 300, 30);
+        getContentPane().add(lblGreeting);
+
+
+        JButton btnLogout = new JButton("登出");
+        btnLogout.setBounds(296, 17, 80, 25);
+        getContentPane().add(btnLogout);
+        btnLogout.addActionListener(e -> {
+            AppContext.currentUser = null; 
+            new Login().setVisible(true);
+            dispose();
+        });
+
+
+        JButton btnMyInterview = new JButton("我的面試");
+        btnMyInterview.setBounds(50, 100, 120, 30);
+        getContentPane().add(btnMyInterview);
+        btnMyInterview.addActionListener(e -> {
+            new MyInterview().setVisible(true);
+            dispose();
+        });
+
+
+        JButton btnHRInterview = new JButton("人資面試管理");
+        btnHRInterview.setBounds(220, 100, 120, 30);
+
+        if (current.getRole().equals("人資") || current.getRole().equals("人資主管") || current.getRole().equals("管理者")) {
+            btnHRInterview.setVisible(true);
+        } else {
+            btnHRInterview.setVisible(false);
+        }
+        getContentPane().add(btnHRInterview);
+        btnHRInterview.addActionListener(e -> {
+            new HRInterviewManagement().setVisible(true);
+            dispose();
+        });
+        
+        
+
+        JButton btnProfileEdit = new JButton("修改個人資料");
+        btnProfileEdit.setBounds(50, 150, 120, 30);
+        getContentPane().add(btnProfileEdit);
+        btnProfileEdit.addActionListener(e -> {
+            new ProfileEditFrame().setVisible(true);
+            dispose();
+        });
+        
+        
+ 
+        if (current.getRole().equals("管理者")) {
+            JButton btnDepartmentManagement = new JButton("部門管理");
+            btnDepartmentManagement.setBounds(220, 150, 120, 30); 
+            getContentPane().add(btnDepartmentManagement);
+            btnDepartmentManagement.addActionListener(e -> {
+    
+                new DepartmentListFrame().setVisible(true);
+                dispose();
+            });
+        }
+        
+        
+        
+    }
+}

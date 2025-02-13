@@ -1,0 +1,407 @@
+package controller.interviewrecord;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
+
+import model.Department;
+import model.InterviewRecord;
+import model.Member;
+import service.DepartmentService;
+import service.MemberService;
+import service.InterviewRecordService;
+import service.impl.DepartmentServiceImpl;
+import service.impl.MemberServiceImpl;
+import service.impl.InterviewRecordServiceImpl;
+import util.Tool;
+
+public class InterviewRecordEditDialog extends JDialog {
+	
+    private InterviewRecord record;
+    private String operation; 
+    
+    private InterviewRecordService interviewRecordService = new InterviewRecordServiceImpl();
+    private DepartmentService departmentService = new DepartmentServiceImpl();
+    private MemberService memberService = new MemberServiceImpl();
+
+    private JTextField tfIntNo;
+    private JTextField tfPosition;
+    private JComboBox<Department> cbDepartment;
+    private JComboBox<Member> cbInterviewer;
+    private JComboBox<Member> cbHr;
+    private JTextField tfIntervieweeName;
+    private JTextField tfIntervieweePhone;
+    private JComboBox<String> cbIntervieweeGender; 
+    private JTextField tfInterviewDate;
+    private JButton btnPickDate;
+    private JTextField tfInterviewTime;
+    private JComboBox<String> cbStatus;
+    private JTextArea taRemarks;
+    private JButton btnSave;  
+
+    public InterviewRecordEditDialog(Frame owner, InterviewRecord record, String operation) {
+        super(owner, operation.equals("新增") ? "新增面試紀錄" : "修改面試紀錄", true);
+        this.record = record;
+        this.operation = operation;
+        initComponents();
+
+        if(operation.equals("修改")){
+            btnSave.setText("更新");
+        }
+
+        loadData();
+        applyPermissions();  
+
+        setTitle("人資面試管理");
+
+        setSize(400, 600);
+        setLocationRelativeTo(owner);
+
+        Font font = new Font("Microsoft JhengHei", Font.PLAIN, 14);
+        setFontRecursively(this, font);
+    }
+
+    private void setFontRecursively(Container container, Font font) {
+        for (Component comp : container.getComponents()) {
+            comp.setFont(font);
+            if (comp instanceof Container) {
+                setFontRecursively((Container) comp, font);
+            }
+        }
+    }
+
+    private void initComponents() {
+
+        JPanel formPanel = new JPanel(new GridLayout(0, 2, 2, 2));
+
+        Dimension fieldSize = new Dimension(100, 25); 
+        Dimension comboSize = new Dimension(100, 25); 
+        Dimension dateFieldSize = new Dimension(100, 25);
+
+        formPanel.add(new JLabel("面試編號:"));
+        tfIntNo = new JTextField();
+        tfIntNo.setEditable(false);
+        tfIntNo.setPreferredSize(fieldSize);
+        formPanel.add(tfIntNo);
+
+        formPanel.add(new JLabel("職稱:"));
+        tfPosition = new JTextField();
+        tfPosition.setPreferredSize(fieldSize);
+        formPanel.add(tfPosition);
+
+        formPanel.add(new JLabel("部門:"));
+        cbDepartment = new JComboBox<>();
+        cbDepartment.setPreferredSize(comboSize);
+        formPanel.add(cbDepartment);
+
+        formPanel.add(new JLabel("面試官:"));
+        cbInterviewer = new JComboBox<>();
+        cbInterviewer.setPreferredSize(comboSize);
+        formPanel.add(cbInterviewer);
+
+        formPanel.add(new JLabel("負責人資:"));
+        cbHr = new JComboBox<>();
+        cbHr.setPreferredSize(comboSize);
+        formPanel.add(cbHr);
+
+        formPanel.add(new JLabel("面試者姓名:"));
+        tfIntervieweeName = new JTextField();
+        tfIntervieweeName.setPreferredSize(fieldSize);
+        formPanel.add(tfIntervieweeName);
+
+        formPanel.add(new JLabel("面試者電話:"));
+        tfIntervieweePhone = new JTextField();
+        tfIntervieweePhone.setPreferredSize(fieldSize);
+        formPanel.add(tfIntervieweePhone);
+
+        formPanel.add(new JLabel("面試者性別:"));
+        cbIntervieweeGender = new JComboBox<>(new String[]{"男", "女"});
+        cbIntervieweeGender.setPreferredSize(comboSize);
+        formPanel.add(cbIntervieweeGender);
+
+        formPanel.add(new JLabel("面試日期:"));
+        JPanel datePanel = new JPanel(new BorderLayout(2,0));
+        tfInterviewDate = new JTextField();
+        tfInterviewDate.setEditable(false);
+        tfInterviewDate.setPreferredSize(dateFieldSize);
+        datePanel.add(tfInterviewDate, BorderLayout.CENTER);
+
+        btnPickDate = new JButton("選擇日期");
+        btnPickDate.addActionListener(e -> {
+            String pickedDate = Tool.pickDate(this);
+            if (pickedDate != null) {
+                tfInterviewDate.setText(pickedDate);
+            }
+        });
+        datePanel.add(btnPickDate, BorderLayout.EAST);
+        formPanel.add(datePanel);
+
+        formPanel.add(new JLabel("面試時間 (HH:mm):"));
+        tfInterviewTime = new JTextField();
+        tfInterviewTime.setPreferredSize(fieldSize);
+        formPanel.add(tfInterviewTime);
+
+        formPanel.add(new JLabel("狀態:"));
+        cbStatus = new JComboBox<>(StatusConstants.STATUS_LIST.toArray(new String[0]));
+        cbStatus.setRenderer(new StatusCellRenderer());
+        cbStatus.setPreferredSize(comboSize);
+        formPanel.add(cbStatus);
+
+        JPanel remarksPanel = new JPanel(new BorderLayout(5, 5));
+        remarksPanel.add(new JLabel("備註:"), BorderLayout.NORTH);
+
+        taRemarks = new JTextArea(5, 30);
+        taRemarks.setLineWrap(true);
+        taRemarks.setWrapStyleWord(true);
+
+        JScrollPane spRemarks = new JScrollPane(taRemarks);
+
+        spRemarks.setPreferredSize(new Dimension(400, 500));
+        remarksPanel.add(spRemarks, BorderLayout.CENTER);
+
+        btnSave = new JButton("儲存");
+        btnSave.addActionListener(e -> saveRecord());
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        bottomPanel.add(btnSave);
+
+        getContentPane().setLayout(new BorderLayout(5,5));
+        getContentPane().add(formPanel, BorderLayout.NORTH);    
+        getContentPane().add(remarksPanel, BorderLayout.CENTER); 
+        getContentPane().add(bottomPanel, BorderLayout.SOUTH);  
+    }
+
+    private void loadData() {
+        List<Member> members = memberService.getAllMembers();
+        Member currentUser = AppContext.currentUser;
+
+        if (operation.equals("新增")) {
+            tfIntNo.setText("系統生成");
+            tfPosition.setText("");
+            tfIntervieweeName.setText("");
+            tfIntervieweePhone.setText("");
+            tfInterviewDate.setText("");
+            tfInterviewTime.setText("");
+            cbStatus.setSelectedIndex(0);
+            taRemarks.setText("");
+            cbIntervieweeGender.setSelectedIndex(0);
+
+            List<Department> departments = departmentService.getAllDepartments();
+            cbDepartment.removeAllItems();
+            for (Department d : departments) {
+                cbDepartment.addItem(d);
+            }
+
+            cbInterviewer.removeAllItems();
+            for (Member m : members) {
+                String mRole = m.getRole();
+                if (mRole.equals("人資主管") || mRole.equals("單位主管") || mRole.equals("管理者")) {
+                    cbInterviewer.addItem(m);
+                }
+            }
+
+            cbHr.removeAllItems();
+            if (currentUser.getRole().equals("人資") 
+                || currentUser.getRole().equals("單位主管")) {
+                cbHr.addItem(currentUser);
+                cbHr.setEnabled(false);
+            } else {
+                for (Member m : members) {
+                    if (m.getRole().equals("人資")) {
+                        cbHr.addItem(m);
+                    }
+                }
+                cbHr.setEnabled(true);
+            }
+
+        } else { 
+            tfIntNo.setText(record.getIntNo());
+            tfPosition.setText(record.getPosition());
+            tfIntervieweeName.setText(record.getIntervieweeName());
+            tfIntervieweePhone.setText(record.getIntervieweePhone());
+
+            Integer gender = record.getIntervieweeGender();
+            if (gender != null) {
+                if (gender == 1) {
+                    cbIntervieweeGender.setSelectedIndex(0);
+                } else if (gender == 2) {
+                    cbIntervieweeGender.setSelectedIndex(1);
+                }
+            } else {
+                cbIntervieweeGender.setSelectedIndex(0);
+            }
+
+            String interviewDateTime = record.getInterviewDate();
+            if (interviewDateTime != null && interviewDateTime.contains(" ")) {
+                String[] parts = interviewDateTime.split(" ");
+                String dbDate = parts[0];
+                String uiDate = dbDate.replace('-', '/');
+                tfInterviewDate.setText(uiDate);
+                tfInterviewTime.setText(parts[1]);
+            } else {
+                tfInterviewDate.setText("");
+                tfInterviewTime.setText("");
+            }
+
+            for (int i = 0; i < cbStatus.getItemCount(); i++) {
+                if (cbStatus.getItemAt(i).equals(record.getStatus())) {
+                    cbStatus.setSelectedIndex(i);
+                    break;
+                }
+            }
+            taRemarks.setText(record.getRemarks());
+
+            List<Department> departments = departmentService.getAllDepartments();
+            cbDepartment.removeAllItems();
+            for (Department d : departments) {
+                cbDepartment.addItem(d);
+            }
+            if (record.getDepartmentNo() != null) {
+                for (int i = 0; i < cbDepartment.getItemCount(); i++) {
+                    Department d = cbDepartment.getItemAt(i);
+                    if (d.getDepNo().equals(record.getDepartmentNo())) {
+                        cbDepartment.setSelectedIndex(i);
+                        break;
+                    }
+                }
+            }
+
+            cbInterviewer.removeAllItems();
+            for (Member m : members) {
+                String mRole = m.getRole();
+                if (mRole.equals("人資主管") 
+                    || mRole.equals("單位主管") 
+                    || mRole.equals("管理者")) {
+                    cbInterviewer.addItem(m);
+                }
+            }
+            if (record.getInterviewerNo() != null) {
+                for (int i = 0; i < cbInterviewer.getItemCount(); i++) {
+                    Member m = cbInterviewer.getItemAt(i);
+                    if (m.getMemNo().equals(record.getInterviewerNo())) {
+                        cbInterviewer.setSelectedIndex(i);
+                        break;
+                    }
+                }
+            }
+
+            cbHr.removeAllItems();
+            if (currentUser.getRole().equals("管理者") 
+                || currentUser.getRole().equals("人資主管")) {
+                for (Member m : members) {
+                    if (m.getRole().equals("人資")) {
+                        cbHr.addItem(m);
+                    }
+                }
+                if (record.getHrNo() != null) {
+                    for (int i = 0; i < cbHr.getItemCount(); i++) {
+                        Member m = cbHr.getItemAt(i);
+                        if (m.getMemNo().equals(record.getHrNo())) {
+                            cbHr.setSelectedIndex(i);
+                            break;
+                        }
+                    }
+                }
+                cbHr.setEnabled(true);
+            } else {
+                Member hr = null;
+                for (Member m : members) {
+                    if (m.getMemNo().equals(record.getHrNo())) {
+                        hr = m;
+                        break;
+                    }
+                }
+                if (hr == null) {
+                    hr = currentUser;
+                }
+                cbHr.addItem(hr);
+                cbHr.setEnabled(false);
+            }
+        }
+    }
+        }
+    }
+
+    private void saveRecord() {
+
+        if (tfIntervieweeName.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "不能為空！");
+            return;
+        }
+        String phone = tfIntervieweePhone.getText().trim();
+        if (!Tool.isValidPhone(phone)) {
+            JOptionPane.showMessageDialog(this, "格式錯誤！");
+            return;
+        }
+
+        String gender = (String) cbIntervieweeGender.getSelectedItem();
+        Integer genderVal = ("女".equals(gender)) ? 2 : 1; 
+
+        String datePart = tfInterviewDate.getText().trim();
+        String timePart = tfInterviewTime.getText().trim();
+        String interviewDateTime = null;
+        if(datePart.isEmpty() && timePart.isEmpty()){
+            interviewDateTime = null;
+        } else if (!datePart.isEmpty() && !timePart.isEmpty()){
+            if (!Tool.isValidDate(datePart)) {
+                JOptionPane.showMessageDialog(this, "格式錯誤！( YYYY/MM/DD )");
+                return;
+            }
+            if (!Tool.isValidTime(timePart)) {
+                JOptionPane.showMessageDialog(this, "格式錯誤！( HH:mm )");
+                return;
+            }
+            interviewDateTime = Tool.mergeDateTime(datePart, timePart);
+        } else {
+            JOptionPane.showMessageDialog(this, "請同時填寫面試日期與面試時間，或都留空！");
+            return;
+        }
+
+
+        if (operation.equals("新增")) {
+            record.setPosition(tfPosition.getText().trim());
+            Department selectedDept = (Department) cbDepartment.getSelectedItem();
+            if (selectedDept != null) {
+                record.setDepartmentNo(selectedDept.getDepNo());
+            }
+            Member selectedInterviewer = (Member) cbInterviewer.getSelectedItem();
+            if (selectedInterviewer != null) {
+                record.setInterviewerNo(selectedInterviewer.getMemNo());
+            }
+            Member selectedHr = (Member) cbHr.getSelectedItem();
+            if (selectedHr != null) {
+                record.setHrNo(selectedHr.getMemNo());
+            }
+        } else {
+            String role = AppContext.currentUser.getRole();
+            if ("管理者".equals(role)) {
+                record.setPosition(tfPosition.getText().trim());
+                Department selectedDept = (Department) cbDepartment.getSelectedItem();
+                if (selectedDept != null) {
+                    record.setDepartmentNo(selectedDept.getDepNo());
+                }
+                Member selectedInterviewer = (Member) cbInterviewer.getSelectedItem();
+                if (selectedInterviewer != null) {
+                    record.setInterviewerNo(selectedInterviewer.getMemNo());
+                }
+                Member selectedHr = (Member) cbHr.getSelectedItem();
+                if (selectedHr != null) {
+                    record.setHrNo(selectedHr.getMemNo());
+                }
+            }
+        }
+        record.setIntervieweeName(tfIntervieweeName.getText().trim());
+        record.setIntervieweePhone(phone);
+        record.setIntervieweeGender(genderVal);
+        record.setInterviewDate(interviewDateTime);
+        record.setStatus(cbStatus.getSelectedItem().toString());
+        record.setRemarks(taRemarks.getText().trim());
+
+        if (operation.equals("新增")) {
+            interviewRecordService.addInterviewRecord(record);
+        } else {
+            interviewRecordService.updateInterviewRecord(record);
+        }
+        JOptionPane.showMessageDialog(this, "儲存成功！");
+        dispose();
+    }
+}

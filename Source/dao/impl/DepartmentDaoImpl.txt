@@ -1,0 +1,156 @@
+package dao.impl;
+
+import dao.DepartmentDao;
+import model.Department;
+import model.Member;
+import util.DbConnection;
+import java.sql.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+public class DepartmentDaoImpl implements DepartmentDao {
+
+    private static Connection conn = DbConnection.getDb();
+
+    @Override
+    public void addDepartment(Department department) {
+        String depNo = getNextDepNo();
+        String sql = "INSERT INTO Department(dep_no, name, description, created_at, updated_at) VALUES(?, ?, ?, NOW(), NOW())";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, depNo);
+            ps.setString(2, department.getName());
+            ps.setString(3, department.getDescription());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public Department getDepartmentByNo(String depNo) {
+        String sql = "SELECT * FROM department WHERE dep_no = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, depNo);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return mapResultSetToDepartment(rs);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public Department getDepartmentById(int id) {
+        String sql = "SELECT * FROM department WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return mapResultSetToDepartment(rs);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    
+    @Override
+    public List<Department> selectById(int id) {
+        String sql = "SELECT * FROM department WHERE id = ?";
+        List<Department> list = new ArrayList<>();
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Department d = new Department();
+                    d.setId(rs.getInt("id"));
+                    d.setDepNo(rs.getString("dep_no"));
+                    d.setName(rs.getString("name"));
+                    d.setDescription(rs.getString("description"));
+                    d.setCreatedAt(rs.getTimestamp("created_at"));
+                    d.setUpdatedAt(rs.getTimestamp("updated_at"));
+                    list.add(d);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    
+
+    @Override
+    public List<Department> getAllDepartments() {
+        String sql = "SELECT * FROM department";
+        List<Department> departments = new ArrayList<>();
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                departments.add(mapResultSetToDepartment(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return departments;
+    }
+
+    @Override
+    public void updateDepartment(Department department) {
+        String sql = "UPDATE department SET name=?, description=?, updated_at=? WHERE id=?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, department.getName());
+            ps.setString(2, department.getDescription());
+            ps.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+            ps.setInt(4, department.getId());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void deleteDepartment(int id) {
+        String sql = "DELETE FROM department WHERE id=?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public String getNextDepNo() {
+        String sql = "SELECT MAX(dep_no) FROM Department";
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                String maxDepNo = rs.getString(1);
+                if (maxDepNo != null) {
+                    int nextNumber = Integer.parseInt(maxDepNo.substring(3)) + 1;
+                    return "dep" + String.format("%03d", nextNumber);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "dep001"; 
+
+    private Department mapResultSetToDepartment(ResultSet rs) throws SQLException {
+        Department department = new Department();
+        department.setId(rs.getInt("id"));
+        department.setDepNo(rs.getString("dep_no"));
+        department.setName(rs.getString("name"));
+        department.setDescription(rs.getString("description"));
+        department.setCreatedAt(rs.getTimestamp("created_at"));
+        department.setUpdatedAt(rs.getTimestamp("updated_at"));
+        return department;
+    }
+
+	
+}

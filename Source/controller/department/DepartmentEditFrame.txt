@@ -1,0 +1,158 @@
+package controller.department;
+
+import javax.swing.*;
+import model.Department;
+import service.DepartmentService;
+import service.impl.DepartmentServiceImpl;
+import util.Tool;
+import controller.member.Home;
+import controller.member.Login;
+import java.awt.*;
+import java.awt.event.*;
+
+public class DepartmentEditFrame extends JFrame {
+    private DepartmentService departmentService = new DepartmentServiceImpl();
+    
+    private Department department;
+    
+    private JTextField txtId;
+    private JTextField txtDepNo;
+    private JTextField txtName;
+    private JTextArea txtDescription;
+    
+    public DepartmentEditFrame(Department department) {
+    	setResizable(false);
+    	
+        if (AppContext.currentUser == null) {
+            JOptionPane.showMessageDialog(this, "尚未登入，請先登入！");
+            new Login().setVisible(true);
+            dispose();
+            return;
+        }
+        if (!"管理者".equals(AppContext.currentUser.getRole())) {
+            JOptionPane.showMessageDialog(this, "您沒有權限進入此頁面！");
+            new Home().setVisible(true);
+            dispose();
+            return;
+        }
+        
+        this.department = department;
+        if (department == null) {
+            setTitle("新增部門");
+        } else {
+            setTitle("修改部門");
+        }
+       
+        setSize(400, 350);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        getContentPane().setLayout(new BorderLayout());
+        
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        formPanel.add(new JLabel("ID:"), gbc);
+        txtId = new JTextField(10);
+        txtId.setEditable(false);
+        gbc.gridx = 1;
+        formPanel.add(txtId, gbc);
+        
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        formPanel.add(new JLabel("部門編號:"), gbc);
+        txtDepNo = new JTextField(10);
+        txtDepNo.setEditable(false);
+        gbc.gridx = 1;
+        formPanel.add(txtDepNo, gbc);
+        
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        formPanel.add(new JLabel("名稱:"), gbc);
+        txtName = new JTextField(20);
+        gbc.gridx = 1;
+        formPanel.add(txtName, gbc);
+        
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        formPanel.add(new JLabel("介紹:"), gbc);
+        
+        txtDescription = new JTextArea(5, 30); 
+        txtDescription.setLineWrap(true);
+        txtDescription.setWrapStyleWord(true);
+        JScrollPane scrollDesc = new JScrollPane(txtDescription);
+
+        scrollDesc.setPreferredSize(new Dimension(300, 100));
+        gbc.gridx = 1;
+        formPanel.add(scrollDesc, gbc);
+        
+        getContentPane().add(formPanel, BorderLayout.CENTER);
+        
+
+        JPanel btnPanel = new JPanel(new FlowLayout());
+        JButton btnSave = new JButton("儲存");
+        JButton btnBack = new JButton("返回");
+        btnPanel.add(btnSave);
+        btnPanel.add(btnBack);
+        getContentPane().add(btnPanel, BorderLayout.SOUTH);
+        
+
+        if (department != null) {
+            txtId.setText(String.valueOf(department.getId()));
+            txtDepNo.setText(department.getDepNo());
+            txtName.setText(department.getName());
+            txtDescription.setText(department.getDescription());
+        }
+        
+
+        btnSave.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String name = txtName.getText().trim();
+                String description = txtDescription.getText().trim();
+                if (name.isEmpty()) {
+                    JOptionPane.showMessageDialog(DepartmentEditFrame.this, "null");
+                    return;
+                }
+                if (department == null) {
+               
+                    Department newDep = new Department();
+                    newDep.setName(name);
+                    newDep.setDescription(description);
+                  
+                    departmentService.addDepartment(newDep);
+                    JOptionPane.showMessageDialog(DepartmentEditFrame.this, "great！");
+                } else {
+                   
+                    department.setName(name);
+                    department.setDescription(description);
+                    departmentService.updateDepartment(department);
+                    JOptionPane.showMessageDialog(DepartmentEditFrame.this, "great！");
+                }
+
+                new DepartmentListFrame().setVisible(true);
+                dispose();
+            }
+        });
+        
+        btnBack.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new DepartmentListFrame().setVisible(true);
+                dispose();
+            }
+        });
+    }
+    
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable(){
+            @Override
+            public void run(){
+                new DepartmentEditFrame(null).setVisible(true);
+            }
+        });
+    }
+}

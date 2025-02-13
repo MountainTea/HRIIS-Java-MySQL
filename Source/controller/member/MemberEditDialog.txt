@@ -1,0 +1,242 @@
+
+package controller.member;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import model.Member;
+import service.MemberService;
+import service.impl.MemberServiceImpl;
+import util.Tool;
+
+public class MemberEditDialog extends JDialog {
+
+    private MemberService memberService;
+    private Member editingMember; 
+
+    private JTextField tfId;
+    private JTextField tfMemNo;
+    private JTextField tfName;
+    private JComboBox<String> cbGender;
+    private JTextField tfEmail;
+    private JTextField tfPhone;
+    private JTextField tfAddress;
+    private JComboBox<String> cbRole;
+    private JPasswordField pfPassword;
+    private JCheckBox chkShowPassword; 
+
+    private JTextField tfCreatedAt;
+    private JTextField tfUpdatedAt;
+
+    private JButton btnSave;
+    private JButton btnCancel;
+
+    private char defaultEchoChar; 
+
+    public MemberEditDialog(Frame owner, Member member) {
+        super(owner, true); 
+        this.memberService = new MemberServiceImpl();
+        this.editingMember = member; 
+
+        setTitle((editingMember == null) ? "新增會員" : "修改會員");
+        initComponents();
+        loadData();
+    }
+
+    private void initComponents() {
+        setSize(400, 400);
+        setLocationRelativeTo(getOwner());
+        setLayout(new BorderLayout(5, 5));
+        setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+
+        JPanel panelForm = new JPanel(new GridLayout(0, 2, 5, 5));
+
+
+        panelForm.add(new JLabel("Email(帳號):"));
+        tfEmail = new JTextField();
+        panelForm.add(tfEmail);
+
+
+        panelForm.add(new JLabel("密碼:"));
+        pfPassword = new JPasswordField();
+        panelForm.add(pfPassword);
+
+        panelForm.add(new JLabel(""));
+        chkShowPassword = new JCheckBox("顯示密碼");
+        defaultEchoChar = pfPassword.getEchoChar();
+        chkShowPassword.addActionListener(e -> {
+            if (chkShowPassword.isSelected()) {
+                pfPassword.setEchoChar((char) 0);
+            } else {
+                pfPassword.setEchoChar(defaultEchoChar);
+            }
+        });
+        panelForm.add(chkShowPassword);
+
+        panelForm.add(new JLabel("ID:"));
+        tfId = new JTextField();
+        tfId.setEditable(false);
+        panelForm.add(tfId);
+
+        panelForm.add(new JLabel("會員編號(mem_no):"));
+        tfMemNo = new JTextField();
+        tfMemNo.setEditable(false);
+        panelForm.add(tfMemNo);
+
+        panelForm.add(new JLabel("姓名:"));
+        tfName = new JTextField();
+        panelForm.add(tfName);
+
+        panelForm.add(new JLabel("性別:"));
+        cbGender = new JComboBox<>(new String[] { "男", "女" });
+        panelForm.add(cbGender);
+
+        panelForm.add(new JLabel("電話:"));
+        tfPhone = new JTextField();
+        panelForm.add(tfPhone);
+
+        panelForm.add(new JLabel("地址:"));
+        tfAddress = new JTextField();
+        panelForm.add(tfAddress);
+
+        panelForm.add(new JLabel("角色:"));
+        cbRole = new JComboBox<>(new String[] { "單位主管", "人資", "人資主管", "管理者" });
+        panelForm.add(cbRole);
+
+        panelForm.add(new JLabel("建立時間:"));
+        tfCreatedAt = new JTextField();
+        tfCreatedAt.setEditable(false);
+        panelForm.add(tfCreatedAt);
+
+        panelForm.add(new JLabel("更新時間:"));
+        tfUpdatedAt = new JTextField();
+        tfUpdatedAt.setEditable(false);
+        panelForm.add(tfUpdatedAt);
+
+        add(panelForm, BorderLayout.CENTER);
+
+        JPanel panelButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        btnSave = new JButton("儲存");
+        btnSave.addActionListener(e -> doSave());
+        panelButtons.add(btnSave);
+
+        btnCancel = new JButton("取消");
+        btnCancel.addActionListener(e -> dispose());
+        panelButtons.add(btnCancel);
+
+        add(panelButtons, BorderLayout.SOUTH);
+    }
+
+    private void loadData() {
+        if (editingMember == null) {
+
+            tfId.setText("");
+            tfMemNo.setText("");
+            tfCreatedAt.setText("");
+            tfUpdatedAt.setText("");
+        } else {
+
+            tfId.setText(String.valueOf(editingMember.getId()));
+            tfMemNo.setText(editingMember.getMemNo());
+            tfName.setText(editingMember.getName());
+            if (editingMember.getGender() != null) {
+                cbGender.setSelectedItem(editingMember.getGender() == 1 ? "男" : "女");
+            }
+            tfEmail.setText(editingMember.getEmail());
+
+            tfPhone.setText(editingMember.getPhone());
+            tfAddress.setText(editingMember.getAddress());
+            if (editingMember.getRole() != null) {
+                cbRole.setSelectedItem(editingMember.getRole());
+            }
+            pfPassword.setText(editingMember.getPassword());
+
+            if (editingMember.getCreatedAt() != null) {
+                tfCreatedAt.setText(editingMember.getCreatedAt().toString());
+            }
+            if (editingMember.getUpdatedAt() != null) {
+                tfUpdatedAt.setText(editingMember.getUpdatedAt().toString());
+            }
+        }
+    }
+
+    private void doSave() {
+
+        String email = tfEmail.getText().trim();
+        String password = new String(pfPassword.getPassword()).trim();
+        String name = tfName.getText().trim();
+        String phone = tfPhone.getText().trim();
+
+
+        if (email.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Email(帳號)不可空白！",  JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (!Tool.isValidEmail(email)) {
+            JOptionPane.showMessageDialog(this, "Email 格式不正確！",  JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (editingMember == null) {
+            if (memberService.isUsernameBeenUse(email)) {
+                JOptionPane.showMessageDialog(this, "此 Email 已被使用！", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        } else {
+            if (!email.equals(editingMember.getEmail()) && memberService.isUsernameBeenUse(email)) {
+                JOptionPane.showMessageDialog(this, "此 Email 已被使用！",  JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        }
+
+        if (!Tool.isValidPassword(password)) {
+            JOptionPane.showMessageDialog(this,
+                "密碼至少 6 碼，需包含英文字母與數字！",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (name.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "姓名不能空白！", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (!Tool.isValidPhone(phone)) {
+            JOptionPane.showMessageDialog(this,
+                "電話格式錯誤(需以 0 開頭，後面皆為數字)！",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+ 
+        if (editingMember == null) {
+
+            Member newMember = new Member();
+            newMember.setEmail(email);
+            newMember.setPassword(password);
+            newMember.setName(name);
+            newMember.setGender("男".equals(cbGender.getSelectedItem()) ? 1 : 2);
+            newMember.setPhone(phone);
+            newMember.setAddress(tfAddress.getText().trim());
+            newMember.setRole(cbRole.getSelectedItem().toString());
+
+            memberService.addMember(newMember);
+            JOptionPane.showMessageDialog(this, "新增成功！");
+            dispose();
+        } else {
+    
+            editingMember.setEmail(email);
+            editingMember.setPassword(password);
+            editingMember.setName(name);
+            editingMember.setGender("男".equals(cbGender.getSelectedItem()) ? 1 : 2);
+            editingMember.setPhone(phone);
+            editingMember.setAddress(tfAddress.getText().trim());
+            editingMember.setRole(cbRole.getSelectedItem().toString());
+
+            memberService.updateMember(editingMember);
+            JOptionPane.showMessageDialog(this, "修改成功！");
+            dispose();
+        }
+    }
+}

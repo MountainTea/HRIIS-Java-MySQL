@@ -1,0 +1,303 @@
+package controller.member;
+
+import java.awt.Color;
+import java.awt.EventQueue;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+
+import model.Member;
+import service.MemberService;
+import service.impl.MemberServiceImpl;
+import util.AppContext;
+import util.Tool;
+import java.awt.Font;
+
+public class Login extends JFrame {
+
+    private static final long serialVersionUID = 1L;
+    private JPanel contentPane;
+
+    private JTextField email;
+    private JPasswordField password;
+    private JTextField txtCaptcha;  
+
+
+    private JLabel lblEmailError;
+    private JLabel lblPasswordError;
+    private JLabel lblCaptchaError;  
+    private JLabel lblCaptchaCode;   
+    
+    private JLabel lblDateTime;
+    
+
+    private MemberService memberService;
+
+
+    private String captchaCode;
+
+    public static void main(String[] args) {
+        EventQueue.invokeLater(() -> {
+            try {
+                Login frame = new Login();
+                frame.setVisible(true);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    public Login() {
+    	setResizable(false);
+
+        if (AppContext.currentUser != null) {
+            Home home = new Home();
+            home.setVisible(true);
+            dispose();
+            return;
+        }
+
+        this.memberService = new MemberServiceImpl();
+
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setBounds(100, 100, 400, 400);
+        contentPane = new JPanel();
+        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+        setContentPane(contentPane);
+        contentPane.setLayout(null);
+        
+        
+        lblDateTime = new JLabel(Tool.getUpdatedDateTime()); 
+        lblDateTime.setHorizontalAlignment(SwingConstants.CENTER);
+        lblDateTime.setBounds(10, 322, 365, 30);
+        contentPane.add(lblDateTime);
+        lblDateTime.setFont(new Font("微軟正黑體", Font.PLAIN, 14));
+
+        //***********time
+        Timer timer = new Timer(1000, e -> lblDateTime.setText(Tool.getUpdatedDateTime()));
+        timer.start();
+        
+       
+        JPanel panel = new JPanel();
+        panel.setBounds(10, 10, 366, 50);
+        contentPane.add(panel);
+        panel.setLayout(null);
+
+        JLabel lblNewLabel = new JLabel("登入");
+        lblNewLabel.setFont(new Font("微軟正黑體", Font.BOLD, 24));
+        lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        lblNewLabel.setBounds(0, 10, 366, 30);
+        panel.add(lblNewLabel);
+
+     
+        JPanel panel_1 = new JPanel();
+        panel_1.setBounds(10, 70, 366, 283);
+        contentPane.add(panel_1);
+        panel_1.setLayout(null);
+
+        JLabel lblNewLabel_1 = new JLabel("Email");
+        lblNewLabel_1.setBounds(55, 35, 46, 15);
+        panel_1.add(lblNewLabel_1);
+
+        email = new JTextField();
+        email.setBounds(111, 32, 203, 21);
+        panel_1.add(email);
+        email.setColumns(10);
+
+        lblEmailError = new JLabel("");
+        lblEmailError.setFont(new Font("微軟正黑體", Font.PLAIN, 11));
+        lblEmailError.setBounds(111, 53, 200, 15);
+        lblEmailError.setForeground(Color.RED);
+        panel_1.add(lblEmailError);
+
+        email.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                checkEmailFormat();
+            }
+        });
+        email.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    checkEmailFormat();
+                }
+            }
+        });
+        JLabel lblNewLabel_1_1 = new JLabel("密碼");
+        lblNewLabel_1_1.setBounds(55, 75, 46, 15);
+        panel_1.add(lblNewLabel_1_1);
+
+        password = new JPasswordField();
+        password.setBounds(111, 72, 96, 21);
+        panel_1.add(password);
+
+        lblPasswordError = new JLabel("");
+        lblPasswordError.setFont(new Font("微軟正黑體", Font.PLAIN, 11));
+        lblPasswordError.setForeground(Color.RED);
+        lblPasswordError.setBounds(111, 93, 255, 15);
+        panel_1.add(lblPasswordError);
+
+        password.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                checkPasswordFormat();
+            }
+        });
+
+        JCheckBox chckbxNewCheckBox = new JCheckBox("顯示密碼");
+        chckbxNewCheckBox.setBounds(223, 71, 95, 23);
+        panel_1.add(chckbxNewCheckBox);
+        chckbxNewCheckBox.addActionListener(e -> {
+            if (chckbxNewCheckBox.isSelected()) {
+                password.setEchoChar((char)0);
+            } else {
+                password.setEchoChar('\u2022');
+            }
+        });
+        JLabel lblCapText = new JLabel("驗證碼");
+        lblCapText.setBounds(55, 125, 46, 15);
+        panel_1.add(lblCapText);
+
+        lblCaptchaCode = new JLabel("");
+        lblCaptchaCode.setBounds(111, 125, 60, 15);
+        panel_1.add(lblCaptchaCode);
+
+        //char
+        captchaCode = Tool.generateRandomCodeWithASCII(4);
+        lblCaptchaCode.setText(captchaCode);
+
+        txtCaptcha = new JTextField();
+        txtCaptcha.setBounds(111, 145, 96, 21);
+        panel_1.add(txtCaptcha);
+
+        lblCaptchaError = new JLabel("");
+        lblCaptchaError.setFont(new Font("微軟正黑體", Font.PLAIN, 11));
+        lblCaptchaError.setForeground(Color.RED);
+        lblCaptchaError.setBounds(111, 166, 200, 15);
+        panel_1.add(lblCaptchaError);
+
+        JButton btnClose = new JButton("關閉視窗");
+        btnClose.setBounds(25, 230, 85, 23);
+        panel_1.add(btnClose);
+        btnClose.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                dispose();
+            }
+        });
+
+        JButton btnReset = new JButton("重新填寫");
+        btnReset.setBounds(135, 230, 85, 23);
+        panel_1.add(btnReset);
+        btnReset.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+      
+                email.setText("");
+                password.setText("");
+                txtCaptcha.setText("");
+
+                lblEmailError.setText("");
+                lblPasswordError.setText("");
+                lblCaptchaError.setText("");
+
+                captchaCode = Tool.generateRandomCodeWithASCII(4);
+                lblCaptchaCode.setText(captchaCode);
+            }
+        });
+
+        JButton btnSubmit = new JButton("送出");
+        btnSubmit.setBounds(246, 230, 85, 23);
+        panel_1.add(btnSubmit);
+        btnSubmit.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+     
+                lblEmailError.setText("");
+                lblPasswordError.setText("");
+                lblCaptchaError.setText("");
+
+                String inputEmail = email.getText().trim();
+                if (!Tool.isValidEmail(inputEmail)) {
+                    lblEmailError.setText("Email格式錯誤");
+                    return;
+                }
+
+                String inputPw = new String(password.getPassword()).trim();
+                if (!Tool.isValidPassword(inputPw)) {
+                    lblPasswordError.setText("需英文及數字組合(大小寫不限)，且須6位數以上。");
+                    return;
+                }
+
+                String inputCap = txtCaptcha.getText().trim();
+                if (!inputCap.equalsIgnoreCase(captchaCode)) {
+                    lblCaptchaError.setText("驗證碼錯誤");
+                    return;
+                }
+
+                Member foundUser = memberService.Login(inputEmail, inputPw);
+                if (foundUser != null) {
+
+                    if (foundUser.getMemNo() == null || foundUser.getMemNo().trim().isEmpty()) {
+                        JOptionPane.showMessageDialog(Login.this,
+                            "錯誤", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    
+                    AppContext.currentUser = foundUser;
+                    JOptionPane.showMessageDialog(Login.this,
+                        "登入成功!\n" + Tool.getCurrentDateTime(), JOptionPane.INFORMATION_MESSAGE);
+
+                    Home home = new Home();
+                    home.setVisible(true);
+                    dispose();
+                } else {
+                    JOptionPane.showMessageDialog(Login.this,
+                        "帳號或密碼錯誤, 請重新輸入", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        JLabel lblNewLabel_2 = new JLabel("註冊會員");
+        lblNewLabel_2.setForeground(new Color(0, 0, 255));
+        lblNewLabel_2.setBounds(111, 190, 96, 15);
+        panel_1.add(lblNewLabel_2);
+        lblNewLabel_2.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                Register regFrame = new Register();
+                regFrame.setVisible(true);
+                dispose();
+            }
+        });
+    }
+
+    private void checkEmailFormat() {
+        lblEmailError.setText("");
+        String checkMail = email.getText().trim();
+        if (checkMail.isEmpty()) return;
+
+        if (!Tool.isValidEmail(checkMail)) {
+            lblEmailError.setForeground(Color.RED);
+            lblEmailError.setText("Email格式錯誤");
+        } else {
+            lblEmailError.setForeground(Color.BLUE);
+            lblEmailError.setText("驗證成功");
+        }
+    }
+
+    private void checkPasswordFormat() {
+        lblPasswordError.setText("");
+        String pw = new String(password.getPassword()).trim();
+        if (pw.isEmpty()) return;  
+
+        if (!Tool.isValidPassword(pw)) {
+            lblPasswordError.setForeground(Color.RED);
+            lblPasswordError.setText("需英文及數字組合(大小寫不限)，且須6位數以上。");
+        } else {
+            lblPasswordError.setForeground(Color.BLUE);
+            lblPasswordError.setText("驗證成功");
+        }
+    }
+}

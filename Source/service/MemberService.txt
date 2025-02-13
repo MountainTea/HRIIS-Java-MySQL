@@ -1,0 +1,26 @@
+package service;
+
+import model.Member;
+import java.util.List;
+
+public interface MemberService {
+
+    /* Create */
+    	void addMember(Member member);
+
+    /* Read */
+    	String getNextMemNo();
+    	Member getMemberByNo(String memNo);
+    	Member getMemberById(int id);
+    	List<Member> getAllMembers();
+    	List<Member> selectById(int id);
+    	Member Login(String email,String password);
+    	boolean isUsernameBeenUse(String email);
+
+    /* Update */
+    	void updateMember(Member member);
+
+    /* Delete */
+    	void deleteMember(int id);
+
+}

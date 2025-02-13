@@ -1,0 +1,25 @@
+package dao;
+
+import model.Department;
+import model.Member;
+
+import java.util.List;
+
+public interface DepartmentDao {
+
+    /* Create */
+		void addDepartment(Department department);
+
+    /* Read */
+		Department getDepartmentByNo(String depNo);
+		Department getDepartmentById(int id);
+		List<Department> selectById(int id);
+		List<Department> getAllDepartments();
+		String getNextDepNo();
+    /* Update */
+		void updateDepartment(Department department);
+    /* Delete */
+		void deleteDepartment(int id);
+
+
+}

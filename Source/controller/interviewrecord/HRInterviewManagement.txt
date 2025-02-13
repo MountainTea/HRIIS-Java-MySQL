@@ -1,0 +1,270 @@
+package controller.interviewrecord;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
+import javax.swing.RowFilter;
+import javax.swing.SortOrder;
+import javax.swing.RowSorter;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.List;
+import java.util.ArrayList;
+import model.InterviewRecord;
+import model.Member;
+import service.InterviewRecordService;
+import service.impl.InterviewRecordServiceImpl;
+import controller.member.Home;
+import controller.member.Login;
+import util.tool;
+import chart.InterviewChartApp;
+import chart.InterviewStatusChartApp; 
+
+public class HRInterviewManagement extends JFrame {
+    private JTable table;
+    private DefaultTableModel model;
+    private InterviewRecordService interviewRecordService = new InterviewRecordServiceImpl();
+
+    public HRInterviewManagement() {
+        setResizable(false);
+        Member currentUser = AppContext.currentUser;
+        if (currentUser == null) {
+            JOptionPane.showMessageDialog(this, "請先登入！");
+            new Login().setVisible(true);
+            dispose();
+            return;
+        }
+        String role = currentUser.getRole();
+        if (!(role.equals("人資") || role.equals("人資主管") || role.equals("管理者"))) {
+            JOptionPane.showMessageDialog(this, "您沒有權限！");
+            new Home().setVisible(true);
+            dispose();
+            return;
+        }
+
+        setTitle("人資面試管理");
+        setSize(1000, 600);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        model = new DefaultTableModel();
+        model.setColumnIdentifiers(new Object[] { title });
+        table = new JTable(model);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model);
+        table.setRowSorter(sorter);
+
+        loadTableData();
+
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        table.getColumnModel().getColumn(0).setPreferredWidth(40);   
+        table.getColumnModel().getColumn(1).setPreferredWidth(100);
+        table.getColumnModel().getColumn(2).setPreferredWidth(80); 
+        table.getColumnModel().getColumn(3).setPreferredWidth(50);  
+        table.getColumnModel().getColumn(4).setPreferredWidth(50);  
+        table.getColumnModel().getColumn(5).setPreferredWidth(50);  
+        table.getColumnModel().getColumn(6).setPreferredWidth(40); 
+        table.getColumnModel().getColumn(7).setPreferredWidth(100); 
+        table.getColumnModel().getColumn(8).setPreferredWidth(100);  
+        table.getColumnModel().getColumn(9).setPreferredWidth(400);  
+
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+            
+                if (e.getClickCount() == 2) {
+                    if (role.equals("人資") || role.equals("人資主管") || role.equals("管理者")) {
+                        int selectedRow = table.getSelectedRow();
+                        if (selectedRow != -1) {
+           
+                            int modelRow = table.convertRowIndexToModel(selectedRow);
+                            String intNo = (String) model.getValueAt(modelRow, 0);
+                            InterviewRecord record = interviewRecordService.getInterviewRecordByNo(intNo);
+                            if (record != null) {
+                                new InterviewRecordEditDialog(HRInterviewManagement.this, record, "修改").setVisible(true);
+                                loadTableData(); 
+                            }
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(HRInterviewManagement.this, "您沒有修改權限！");
+                    }
+                }
+            }
+        });
+
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        
+
+        searchPanel.add(new JLabel("搜尋："));
+        JTextField txtSearch = new JTextField(20);
+        searchPanel.add(txtSearch);
+
+        searchPanel.add(new JLabel("進度："));
+        JComboBox<String> cboStatus = new JComboBox<>(new String[] {"全部", "結案", "未結案"});
+        searchPanel.add(cboStatus);
+
+        searchPanel.add(cboSort);
+        
+
+        JButton btnSearch = new JButton("搜尋");
+        searchPanel.add(btnSearch);
+   
+        ActionListener searchAction = e -> applyFilters(sorter, txtSearch, cboStatus);
+        btnSearch.addActionListener(searchAction);
+        txtSearch.addActionListener(searchAction);
+        cboStatus.addActionListener(searchAction);
+        add(searchPanel, BorderLayout.NORTH);
+        
+    
+        cboSort.addActionListener(e -> {
+            int selectedIndex = cboSort.getSelectedIndex();
+            if (selectedIndex > 0) {
+        
+                List<RowSorter.SortKey> sortKeys = new ArrayList<>();
+                sortKeys.add(new RowSorter.SortKey(selectedIndex - 1, SortOrder.ASCENDING));
+                sorter.setSortKeys(sortKeys);
+            } else {
+                sorter.setSortKeys(null);  
+            }
+        });
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        add(scrollPane, BorderLayout.CENTER);
+
+        JPanel bottomPanel = new JPanel();
+
+        JButton btnBack = new JButton("返回首頁");
+        btnBack.addActionListener(e -> {
+            new Home().setVisible(true);
+            dispose();
+        });
+        bottomPanel.add(btnBack);
+
+        JButton btnAdd = new JButton("新增");
+        btnAdd.addActionListener(e -> {
+            if (role.equals("人資") || role.equals("人資主管") || role.equals("管理者")) {
+                InterviewRecord newRecord = new InterviewRecord();
+                new InterviewRecordEditDialog(HRInterviewManagement.this, newRecord, "新增").setVisible(true);
+                loadTableData();
+            } else {
+                JOptionPane.showMessageDialog(HRInterviewManagement.this, "您沒有權限！");
+            }
+        });
+        bottomPanel.add(btnAdd);
+
+        JButton btnDelete = new JButton("刪除");
+        btnDelete.addActionListener(e -> {
+            if (role.equals("管理者")) {
+                int selectedRow = table.getSelectedRow();
+                if (selectedRow != -1) {
+                    int modelRow = table.convertRowIndexToModel(selectedRow);
+                    String intNo = (String) model.getValueAt(modelRow, 0);
+                    InterviewRecord record = interviewRecordService.getInterviewRecordByNo(intNo);
+                    if (record != null) {
+                        int confirm = JOptionPane.showConfirmDialog(HRInterviewManagement.this,
+                                "確定要刪除面試紀錄：" + record.getIntNo() + "？", "確認刪除", JOptionPane.YES_NO_OPTION);
+                        if (confirm == JOptionPane.YES_OPTION) {
+                            interviewRecordService.deleteInterviewRecord(record.getId());
+                            loadTableData();
+                        }
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(HRInterviewManagement.this, "請選擇！");
+                }
+            } else {
+                JOptionPane.showMessageDialog(HRInterviewManagement.this, "只有管理者可以操作！");
+            }
+        });
+        bottomPanel.add(btnDelete);
+
+        JButton btnModify = new JButton("修改");
+        btnModify.addActionListener(e -> {
+            if (role.equals("人資") || role.equals("人資主管") || role.equals("管理者")) {
+                int selectedRow = table.getSelectedRow();
+                if (selectedRow != -1) {
+                    int modelRow = table.convertRowIndexToModel(selectedRow);
+                    String intNo = (String) model.getValueAt(modelRow, 0);
+                    InterviewRecord record = interviewRecordService.getInterviewRecordByNo(intNo);
+                    if (record != null) {
+                        new InterviewRecordEditDialog(HRInterviewManagement.this, record, "修改").setVisible(true);
+                        loadTableData();
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(HRInterviewManagement.this, "請選擇一筆記錄！");
+                }
+            } else {
+                JOptionPane.showMessageDialog(HRInterviewManagement.this, "您沒有權限！");
+            }
+        });
+        bottomPanel.add(btnModify);
+
+
+     if (role.equals("管理者") || role.equals("人資主管")) {
+         JButton btnStatusChart = new JButton("圖表");
+         btnStatusChart.addActionListener(e -> {
+             InterviewStatusChartApp.main(new String[0]);
+         });
+         bottomPanel.add(btnStatusChart);
+
+         JButton btnGenderChart = new JButton("圖表");
+         btnGenderChart.addActionListener(e -> {
+             InterviewChartApp.main(new String[0]);
+         });
+         bottomPanel.add(btnGenderChart);
+     }
+
+        add(bottomPanel, BorderLayout.SOUTH);
+    }
+
+    private void applyFilters(TableRowSorter<DefaultTableModel> sorter, JTextField txtSearch, JComboBox<String> cboStatus) {
+        List<RowFilter<Object, Object>> filters = new ArrayList<>();
+        
+        String searchText = txtSearch.getText().trim();
+        if (!searchText.isEmpty()) {
+            filters.add(RowFilter.regexFilter("(?i)" + searchText));
+        }
+        String statusSelected = (String) cboStatus.getSelectedItem();
+        if ("結案".equals(statusSelected)) {
+            filters.add(RowFilter.regexFilter("結案", 8));
+        } else if ("未結案".equals(statusSelected)) {
+        	
+            filters.add(RowFilter.notFilter(RowFilter.regexFilter("結案", 8)));
+        }
+        if (!filters.isEmpty()) {
+            RowFilter<Object, Object> compoundRowFilter = RowFilter.andFilter(filters);
+            sorter.setRowFilter(compoundRowFilter);
+        } else {
+            sorter.setRowFilter(null);
+        }
+    }
+    private void loadTableData() {
+        model.setRowCount(0);
+        List<InterviewRecord> records = interviewRecordService.getAllInterviewRecords();
+        Member currentUser = AppContext.currentUser;
+        if (currentUser.getRole().equals("人資")) {
+
+            records.removeIf(r -> !r.getHrNo().equals(currentUser.getMemNo()));
+        }
+        for (InterviewRecord r : records) {
+            model.addRow(new Object[] {
+                r.getIntNo(),
+                r.getPosition(),
+                r.getDepartmentName(),
+                r.getInterviewerName(),
+                r.getHrName(),
+                r.getIntervieweeName(),
+                genderInChinese(r.getIntervieweeGender()),
+                r.getInterviewDate(),
+                r.getStatus(),
+                r.getRemarks()
+            });
+        }
+    }
+    
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            new HRInterviewManagement().setVisible(true);
+        });
+    }
+}

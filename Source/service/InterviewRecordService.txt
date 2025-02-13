@@ -1,0 +1,29 @@
+package service;
+
+import model.InterviewRecord;
+import java.util.List;
+
+public interface InterviewRecordService {
+
+    /* Create */
+    void addInterviewRecord(InterviewRecord record);
+
+    /* Read */
+    InterviewRecord getInterviewRecordById(int id);
+    InterviewRecord getInterviewRecordByNo(String intNo);
+    List<InterviewRecord> getAllInterviewRecords();
+    List<InterviewRecord> getInterviewRecordsByIntervieweeName(String intervieweeName);
+    List<InterviewRecord> getInterviewRecordsByIntervieweePhone(String intervieweePhone);
+    List<InterviewRecord> getInterviewRecordsByInterviewerNo(String interviewerNo);
+    List<InterviewRecord> getInterviewRecordsByHrNo(String hrNo);
+    List<InterviewRecord> getInterviewRecordsByDepartmentNo(String departmentNo);
+    String getNextIntNo();
+
+    /* Update */
+    void updateInterviewRecord(InterviewRecord record);
+
+    /* Delete */
+    void deleteInterviewRecord(int id);
+
+
+}
