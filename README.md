@@ -83,7 +83,7 @@ HumanResources/
 - ### **資料庫環境：**  
 請安裝 MySQL（建議使用 [MySQL Community Server](https://dev.mysql.com/downloads/mysql/ "資料庫程式下載")），並匯入提供的 SQL 腳本建立所需的資料表。
 - ### **JDK環境：**  
-下載並安裝 [JDK 11](https://www.oracle.com/java/technologies/downloads/#java11?er=221886 "JDK程式下載")。
+下載並安裝 [JDK 11](https://www.oracle.com/java/technologies/downloads/#java11?er=221886 "JDK程式下載")環境。
 - ### **檢查Java 版本：**   
 在 CMD 中執行下列命令以確認安裝版本。
 ```plaintext
