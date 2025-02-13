@@ -70,10 +70,17 @@ HumanResources/
 ```
 ---
 
+## 測試環境
+
+- **資料庫環境：**請安裝 MySQL（建議使用 [MySQL Community Server](https://dev.mysql.com/downloads/mysql/ "資料庫程式下載")），並匯入提供的 SQL 腳本建立所需的資料表。
+- **JDK環境：**下載並安裝 [JDK 11](https://www.oracle.com/java/technologies/downloads/#java11?er=221886 "JDK程式下載")。  
+  
+---
+
 ## 下載資源
 
 - **資料庫：** [檢視](https://github.com/MountainTea/HRIIS-Java-MySQL/tree/main/sql "MySQL資料表下載")
-- **執行檔：** [檢視](https://github.com/MountainTea/HRIIS-Java-MySQL/tree/main/jar "(.jar下載)")  
+- **執行檔：** [檢視](https://github.com/MountainTea/HRIIS-Java-MySQL/tree/main/jar "(.jar)下載")  
  ※ 請將資料表(.sql)匯入再行啟動程式(.jar)。
 
 ---
