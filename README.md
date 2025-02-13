@@ -83,6 +83,7 @@ HumanResources/
 - **欄位驗證：**  
   部分欄位輸入時會有即時檢核機制，且帳號(E-mail)部分有唯一識別規範。  
 (EX. 登入/註冊 帳號(E-mail)、密碼、姓名、電話...等)  
+![圖1](ExImg/verify.png "Authentication Mechanism")</a> 
 
 - **權限：**  
   部分頁面進入及使用權限有限制。  
@@ -91,4 +92,4 @@ HumanResources/
 
 - **列印及篩選：**  
   部分管理列表可進行篩選及列印功能，其中列印功能 採IO暫存式列印，當關閉畫面後，暫存檔案(tempReport.txt)會刪除。
-  ![圖1](ExImg/tempReport.png "TempReport Related")</a>  
+  ![圖2](ExImg/tempReport.png "TempReport Related")</a>  
