@@ -12,7 +12,7 @@ HRIIS-Java-MySQL 是一個基於 Java 與 MySQL 技術打造的人資面試邀�
 
 ---
 
-## 技術棧
+## 技術
 
 - ### **程式語言：** Java  
 - ### **UI 技術：** Java Swing  
