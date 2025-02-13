@@ -89,5 +89,4 @@ HumanResources/
 「管理員」為最高權限，方可進入 管理會員及部門資料。)  
 - **列印及篩選：**  
   ###部分管理列表可進行篩選及列印功能，其中列印功能 採IO暫存式列印，當關閉畫面後，暫存檔案(tempReport.txt)會刪除。
-  ![圖1](ExImg/tempReport_01.png "列印時")</a>  
-  ![圖1](ExImg/tempReport_02.png "關閉畫面時")</a>
+  ![圖1](ExImg/tempReport.png "TempReport Related")</a>  
