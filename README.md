@@ -91,7 +91,7 @@ HumanResources/
 
 - **欄位驗證：**  
   部分欄位輸入時會有即時檢核機制，且帳號(E-mail)部分有唯一識別規範。  
-(EX. 登入/註冊 帳號(E-mail)、密碼、姓名、電話...等)  
+(EX. 登入/註冊 帳號(E-mail)、密碼、姓名、電話、面試日期與時間必須同時輸入或都保持空白...等)  
 ![圖2](ExImg/verify.png "Authentication Mechanism")</a> 
 
 - **權限：**  
